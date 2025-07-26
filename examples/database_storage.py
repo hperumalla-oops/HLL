@@ -1,17 +1,8 @@
 import psycopg2
 import base64
 import pickle
-from large_estimates import HyperLogLog  # 👈 Our accurate HLL
+ ####NEEDD TO IMPORT DEPENDENCIES class hyperloglog from  /hyperloglog/core
 
-def serialize_hll(hll_obj):
-    """Serialize HyperLogLog to base64 (Postgres style)"""
-    binary = pickle.dumps(hll_obj)  # or struct.pack if you want exact C memory layout
-    return base64.b64encode(binary).decode('ascii')
-
-def deserialize_hll(b64_data):
-    """Deserialize HyperLogLog from base64"""
-    binary = base64.b64decode(b64_data)
-    return pickle.loads(binary)
 
 try:
     conn = psycopg2.connect(
