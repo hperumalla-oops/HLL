@@ -1,1 +1,6 @@
 math
+bisect
+psycopg2==2.9.10
+unittest
+pickle
+base64
