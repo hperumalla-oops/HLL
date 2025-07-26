@@ -1,8 +1,3 @@
-"""
-core.py
--------
-Main HyperLogLog interface, dispatching to dense or sparse as needed.
-"""
 from .dense import DenseHyperLogLog
 from .sparse import hll_estimate_sparse, dedupe_and_sort
 
