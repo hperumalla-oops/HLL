@@ -1,7 +1,7 @@
 import psycopg2
 import base64
 import pickle
- ####NEEDD TO IMPORT DEPENDENCIES class hyperloglog from  /hyperloglog/core
+from hyperloglog.core import HyperLogLog
 
 
 try:
