@@ -1,7 +1,7 @@
 import psycopg2
 import base64
 import pickle
- ####NEEDD TO IMPORT DEPENDENCIES
+from hyperloglog.core import HyperLogLog
 
 
 fruits = ["apple", "banana", "orange", "grape", "mango", "banana", "apple"]
