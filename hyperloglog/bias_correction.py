@@ -1,8 +1,3 @@
-"""
-bias_correction.py
-------------------
-Bias correction tables and interpolation for HyperLogLog.
-"""
 from bisect import bisect_left
 from .constants import rawEstimateData, biasData
 
