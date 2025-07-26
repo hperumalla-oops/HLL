@@ -1,7 +1,8 @@
 from bisect import bisect_left
 import math
 
-from .bias_correction import ALPHA_MM, THRESHOLD, bias_estimate
+from .constants import ALPHA_MM, THRESHOLD
+from .bias_correction import bias_estimate
 from .hash_utils import murmurhash64a
 
 class DenseHyperLogLog:
