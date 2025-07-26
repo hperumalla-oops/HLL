@@ -1,8 +1,13 @@
 def murmurhash64a(key, seed=0):
     """MurmurHash64A ported from C (Postgres)."""
+    if isinstance(key, str):
+        data = bytearray(key.encode('utf8'))
+    elif isinstance(key, bytes):
+        data = bytearray(key)
+    else:
+        raise TypeError("key must be str or bytes")
     m = 0xc6a4a7935bd1e995
     r = 47
-    data = bytearray(key.encode('utf8'))
     length = len(data)
     h = (seed ^ (length * m)) & 0xFFFFFFFFFFFFFFFF
 
@@ -14,7 +19,6 @@ def murmurhash64a(key, seed=0):
         h ^= k
         h = (h * m) & 0xFFFFFFFFFFFFFFFF
 
-    # handle remaining bytes
     remaining = length & 7
     if remaining:
         last_bytes = int.from_bytes(data[-remaining:] + b'\x00'*(8-remaining), 'little')
@@ -25,4 +29,3 @@ def murmurhash64a(key, seed=0):
     h = (h * m) & 0xFFFFFFFFFFFFFFFF
     h ^= (h >> r)
     return h
-
