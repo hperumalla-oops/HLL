@@ -18,3 +18,11 @@ class HyperLogLog:
 
     def estimate(self):
         return self.impl.estimate()
+        
+    def merge(self, hll2):
+        n = max(self.m, hll2.m)
+        registers = []
+        for i in range(n):
+            registers.append(max(self.registers[i], hll2.registers[i]))
+        self.registers = registers[:]
+        return self.estimate()
