@@ -24,7 +24,7 @@ cd hyperloglog-python
 pip install -r requirments.txt
 ```
 
-## 📖 Quick Start
+##  Quick Start
 
 ```python
 from hyperloglog import HyperLogLog
@@ -71,6 +71,11 @@ cur.execute("INSERT INTO analytics (hll_data) VALUES (%s)", (serialized,))
 cur.execute("SELECT hll_data FROM analytics WHERE id = %s", (1,))
 loaded_hll = HyperLogLog.from_base64(cur.fetchone()[0])
 print(f"Cardinality: {loaded_hll.estimate()}")
+```
+### Examples provided
+```bash
+cd examples
+py python database_storage.py --dbname dbname --user postgres --password pwd --host localhost --port 5432
 ```
 
 
