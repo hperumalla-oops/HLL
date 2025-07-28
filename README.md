@@ -40,7 +40,7 @@ for i in range(50000, 150000):
     hll2.add(f"user_{i}")
 
 merged = hll.merge(hll2)
-print(f"Union estimate: {merged}")
+print("Union estimate:",merged)
 ```
 
 ## Database Integration
