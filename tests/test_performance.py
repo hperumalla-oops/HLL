@@ -1,3 +1,5 @@
+'''to run without moving the hyerloglog folder use command
+python -m unittest tests.test_performance'''
 import unittest
 import time
 from hyperloglog.core import HyperLogLog
