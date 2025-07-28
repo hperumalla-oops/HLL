@@ -1,3 +1,5 @@
+'''to run without moving the hyerloglog folder use command
+python -m examples.database_storage'''
 import psycopg2
 import base64
 import pickle
