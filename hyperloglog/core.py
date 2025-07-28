@@ -7,8 +7,9 @@ class HyperLogLog:
         self.mode = mode
         if mode == 'dense':
             self.impl = DenseHyperLogLog(b)
+            self.registers = self.impl.registers
         elif mode == 'sparse':
-            self.impl = SparseHyperLogLog(b)           
+            self.impl = SparseHyperLogLog(b)     
         else:
             raise ValueError('Unknown mode: ' + str(mode))
 
