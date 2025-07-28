@@ -85,12 +85,12 @@ class SparseHyperLogLog:
     
     def _convert_to_dense(self):
         """Convert from sparse to dense representation"""
-        self.dense_registers = [0] * self.m
+        self.registers = [0] * self.m
         
         for idx, rho in self.sparse_registers:
-            self.dense_registers[idx] = rho
+            self.registers[idx] = rho
             
-        self.sparse_registers = []
+        # self.sparse_registers = []
         self.is_sparse = False
     
     def _dense_add(self, item):
@@ -99,7 +99,7 @@ class SparseHyperLogLog:
         idx = hash_value >> (64 - self.b)
         w = (hash_value << self.b) & ((1 << 64) - 1)
         rho = self._rho(w, 64 - self.b)
-        self.dense_registers[idx] = max(self.dense_registers[idx], rho)
+        self.registers[idx] = max(self.registers[idx], rho)
     
     def estimate(self):
         if self.is_sparse:
@@ -134,9 +134,9 @@ class SparseHyperLogLog:
     def _dense_estimate(self):
         """Estimate cardinality using dense representation (after conversion)"""
         m = self.m
-        Z = sum(2.0 ** -r for r in self.dense_registers)
+        Z = sum(2.0 ** -r for r in self.registers)
         E = ALPHA_MM[self.b] / Z
-        V = self.dense_registers.count(0)
+        V = self.registers.count(0)
         
         if E <= THRESHOLD[self.b]:
             correction = bias_estimate(E, self.b)
