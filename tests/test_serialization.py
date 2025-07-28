@@ -1,3 +1,5 @@
+'''to run without moving the hyerloglog folder use command
+python -m unittest tests.test_serialization'''
 import unittest
 from hyperloglog.core import HyperLogLog
 from hyperloglog.serialization import serialize_hll, deserialize_hll
