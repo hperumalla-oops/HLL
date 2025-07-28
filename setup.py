@@ -7,7 +7,7 @@ setup(
     author='RV AIML Dep',
     packages=find_packages(),  
     install_requires=[
-        psycopg2==2.9.10
+        'psycopg2==2.9.10'
     ],
     python_requires='>=3.6',
 )
