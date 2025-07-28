@@ -50,13 +50,8 @@ print("Union estimate:",merged)
 import psycopg2
 from hyperloglog.core import HyperLogLog
 from hyperloglog.serialization import serialize_hll, deserialize_hll
-
-your_data=['apple', 'is', 'awesome','yaya','this','is','crazy','efee','feats','micorsoft','rejected','me','yesyes','hlolate','epsilon']
-
-hll = HyperLogLog(b=14)  ##2^14 = 16384 buckets
-for item in your_data:
-    hll.add(item)
-
+COLUMN_NAME = ''
+TABLE_NAME = ''
 # Store in PostgreSQL
 conn = psycopg2.connect(
         dbname="xx",  ##change
@@ -66,7 +61,32 @@ conn = psycopg2.connect(
         port=5432)
 
 cur = conn.cursor()
+query = f"SELECT {COLUMN_NAME} FROM {TABLE_NAME}"
+cur.execute(query)
+rows = cur.fetchall()
+
+hll = HyperLogLog(b=14)  ##2^14 = 16384 buckets
+for item in your_data:
+    hll.add(item)
 print(f"Cardinality: {hll.estimate()}")
+cur.execute("""
+    CREATE TABLE IF NOT EXISTS hll_snapshots (
+        id SERIAL PRIMARY KEY,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        hll_mode TEXT,
+        hll_b INT,
+        hll_data BYTEA
+    );
+""")
+conn.commit()
+cur.execute("""
+    INSERT INTO hll_snapshots (hll_mode, hll_b)
+    VALUES (%s, %s, %s)
+""", (hll.mode, hll.b, serialized_hll))
+
+conn.commit()
+cur.close()
+conn.close()
 ```
 
 ### Core Classes
