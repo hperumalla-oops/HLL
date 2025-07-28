@@ -8,8 +8,7 @@ class HyperLogLog:
         if mode == 'dense':
             self.impl = DenseHyperLogLog(b)
         elif mode == 'sparse':
-            # Placeholder: you can implement a SparseHyperLogLog class if needed
-            raise NotImplementedError('Sparse mode not implemented as a class')
+            self.impl = SparseHyperLogLog(b)           
         else:
             raise ValueError('Unknown mode: ' + str(mode))
 
@@ -20,9 +19,16 @@ class HyperLogLog:
         return self.impl.estimate()
         
     def merge(self, hll2):
-        n = max(self.m, hll2.m)
-        registers = []
-        for i in range(n):
-            registers.append(max(self.registers[i], hll2.registers[i]))
-        self.registers = registers[:]
+        if self.b != hll2.b:
+            raise ValueError("Cannot merge HLLs with different precision (b) values")
+        if self.mode == 'sparse' and hll2.mode == 'dense':
+            self._convert_to_dense();
+        if hll2.mode == 'sparse' and self.mode == 'dense':
+            hll2._convert_to_dense();
+                              
+        m = 1 << self.b
+        merged_registers = [ max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m) ]
+
+        self.impl.registers = merged_registers
+
         return self.estimate()
