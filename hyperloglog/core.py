@@ -22,10 +22,10 @@ class HyperLogLog:
     def merge(self, hll2):
         if self.b != hll2.b:
             raise ValueError("Cannot merge HLLs with different precision (b) values")
-        if self.mode == 'sparse' and hll2.mode == 'dense':
+        if self.mode == 'sparse':
             self._convert_to_dense();
-        if hll2.mode == 'sparse' and self.mode == 'dense':
-            hll2._convert_to_dense();
+        if hll2.mode == 'sparse':
+            hll2._convert_to_dense()
                               
         m = 1 << self.b
         merged_registers = [ max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m) ]
