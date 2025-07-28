@@ -7,9 +7,9 @@ from hyperloglog.serialization import *
 
 try:
     conn = psycopg2.connect(
-        dbname="hll_test",
-        user="postgres",
-        password="AIML",  
+        dbname="hll_test", # change
+        user="postgres", #change
+        password="AIML",   #change
         host="localhost",
         port=5432
     )
@@ -19,7 +19,7 @@ except psycopg2.Error as e:
     raise
 
 try:
-    cur.execute("DROP TABLE IF EXISTS hll_counters")
+    cur.execute("DROP TABLE IF EXISTS hll_counters") # change
     cur.execute("""
         CREATE TABLE hll_counters (
             label TEXT,
