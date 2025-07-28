@@ -14,12 +14,7 @@ A high-performance Python implementation of the HyperLogLog probabilistic cardin
 ## 🔧 Installation
 
 ```bash
-pip install hyperloglog-python
-```
-
-Or from source:
-```bash
-git clone https://github.com/yourusername/hyperloglog-python
+git clone https://github.com/hperumalla-oops/HLL.git
 cd hyperloglog-python
 pip install -e .
 ```
