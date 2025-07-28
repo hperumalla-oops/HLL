@@ -73,16 +73,15 @@ cur.execute("""
     CREATE TABLE IF NOT EXISTS hll_snapshots (
         id SERIAL PRIMARY KEY,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        hll_mode TEXT,
-        hll_b INT,
-        hll_data BYTEA
+        cardinality INT,
+        compressed_registers BYTEA
     );
 """)
 conn.commit()
 cur.execute("""
-    INSERT INTO hll_snapshots (hll_mode, hll_b)
-    VALUES (%s, %s, %s)
-""", (hll.mode, hll.b, serialized_hll))
+    INSERT INTO hll_snapshots (cardinality, compressed_registers)
+    VALUES (%s, %s)
+""", (hll.estimate, hll.store()))
 
 conn.commit()
 cur.close()
