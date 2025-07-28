@@ -22,9 +22,9 @@ datasets = {
 
 try:
     conn = psycopg2.connect(
-        dbname="hll_test",
-        user="postgres",
-        password="badattitude@2005", 
+        dbname="hll_test", #change
+        user="postgres", #change
+        password="AIML", #change
         host="localhost",
         port=5432
     )
