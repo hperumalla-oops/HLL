@@ -15,7 +15,7 @@ A high-performance Python implementation of the HyperLogLog probabilistic cardin
 
 ```bash
 git clone https://github.com/hperumalla-oops/HLL.git
-cd hyperloglog-python
+cd HLL
 pip install -e .
 ```
 
