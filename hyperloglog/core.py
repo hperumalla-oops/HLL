@@ -1,5 +1,5 @@
 from .dense import DenseHyperLogLog
-from .sparse import hll_estimate_sparse, dedupe_and_sort
+from .sparse import hll_estimate_sparse, dedupe_and_sort, SparseHyperLogLog
 
 class HyperLogLog:
     def __init__(self, b=14, mode='dense'):
