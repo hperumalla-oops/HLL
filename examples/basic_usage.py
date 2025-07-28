@@ -2,6 +2,8 @@ import psycopg2
 import base64
 import pickle
 from hyperloglog.core import HyperLogLog
+from hyperloglog.serialization import *
+
 
 
 fruits = ["apple", "banana", "orange", "grape", "mango", "banana", "apple"]
