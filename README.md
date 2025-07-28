@@ -66,28 +66,7 @@ conn = psycopg2.connect(
         port=5432)
 
 cur = conn.cursor()
-
-
-## Serialize to base64 for storage
-serialized = serialize_hll(hll)
-cur.execute("""
-    CREATE TABLE IF NOT EXISTS analytics (
-        id SERIAL PRIMARY KEY,
-        hll_data TEXT
-    );
-""")
-conn.commit()
-
-cur.execute("INSERT INTO analytics (hll_data) VALUES (%s)", (serialized,))
-conn.commit()
-
-cur.execute("SELECT hll_data FROM analytics ORDER BY id DESC LIMIT 1")
-fetched_serialized = cur.fetchone()[0]
-
-# Deserialize
-binary = deserialize_hll(fetched_serialized)
-
-print(f"Cardinality: {binary.estimate()}")
+print(f"Cardinality: {hll.estimate()}")
 ```
 
 ### Core Classes
