@@ -4,14 +4,14 @@ A high-performance Python implementation of the HyperLogLog probabilistic cardin
 
 ##  Features
 
-- **Sparse & Dense Encoding**: Automatically switches from memory-efficient sparse to dense representation
-- **High Accuracy**: Implements bias correction and linear counting for small cardinalities
-- **PostgreSQL Compatible**: Binary format compatible with PostgreSQL HLL extension
-- **Compression Support**: Multiple compression algorithms for storage efficiency
-- **Set Operations**: Union, intersection, complement operations on HLL counters
-- **Serialization**: Base64 encoding for database storage
-
-## 🔧 Installation
+- **Sparse & Dense Encoding**
+- **High Accuracy**
+- **PostgreSQL Compatible**
+- **Compression Support**
+- **Set Operations**
+- **Serialization**
+  
+## Installation
 
 ```bash
 git clone https://github.com/hperumalla-oops/HLL.git
@@ -42,7 +42,7 @@ merged = hll.merge(hll2)
 print(f"Union estimate: {merged.estimate()}")
 ```
 
-## 🗄️ Database Integration
+## Database Integration
 
 ### PostgreSQL Example
 ```python
