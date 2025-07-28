@@ -21,7 +21,7 @@ Or from source:
 ```bash
 git clone https://github.com/yourusername/hyperloglog-python
 cd hyperloglog-python
-pip install -r requirments.txt
+pip install -e .
 ```
 
 ##  Quick Start
@@ -85,7 +85,8 @@ py python database_storage.py --dbname dbname --user postgres --password pwd --h
 Main HLL counter class with automatic sparse-to-dense conversion.
 
 **Parameters:**
-- `b` (int): Number of index bits (4-18). Defualt: 14. (Higher = more accurate but more memory)
+- `b` (int): Number of index bits (4-18). Defualt: 14.
+   (Higher = more accurate but more memory)
 - `mode` (str): dense or sparse. Defualt: dense
 
 **Methods:**
