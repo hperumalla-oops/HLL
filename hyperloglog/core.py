@@ -1,15 +1,16 @@
 from .dense import DenseHyperLogLog
 from .sparse import hll_estimate_sparse, dedupe_and_sort, SparseHyperLogLog
+from .compression import pack_registers, unpack_registers
 
 class HyperLogLog:
     def __init__(self, b=14, mode='dense'):
         self.b = b
         self.mode = mode
+        self.dontbefore = False
         if mode == 'dense':
             self.impl = DenseHyperLogLog(b)
-            self.registers = self.impl.registers
         elif mode == 'sparse':
-            self.impl = SparseHyperLogLog(b)     
+            self.impl = SparseHyperLogLog(b)           
         else:
             raise ValueError('Unknown mode: ' + str(mode))
 
@@ -18,12 +19,19 @@ class HyperLogLog:
 
     def estimate(self):
         return self.impl.estimate()
+
+    def storing(self):
+        return pack_registers(self.impl.registers, 14)
+
+    def decompress(self, packed_registers): # takes the output of storing
+         unpack_registers(packed_registers, 1 << self.b, 14)
+
         
     def merge(self, hll2):
         if self.b != hll2.b:
             raise ValueError("Cannot merge HLLs with different precision (b) values")
         if self.mode == 'sparse':
-            self._convert_to_dense();
+            self._convert_to_dense()
         if hll2.mode == 'sparse':
             hll2._convert_to_dense()
                               
