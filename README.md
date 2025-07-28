@@ -89,12 +89,6 @@ binary = deserialize_hll(fetched_serialized)
 
 print(f"Cardinality: {binary.estimate()}")
 ```
-### Examples provided
-```bash
-cd examples
-py python database_storage.py --dbname dbname --user postgres --password pwd --host localhost --port 5432
-```
-
 
 ### Core Classes
 
@@ -112,18 +106,3 @@ Main HLL counter class with automatic sparse-to-dense conversion.
 - `merge(other: HyperLogLog) -> HyperLogLog`: Merge with another counter
 
 
-### Set Operations
-
-```python
-# Union (|)
-union_count = hll1 | hll2
-
-# Intersection (&)  
-intersection_count = hll1 & hll2
-
-# Difference (-)
-difference_count = hll1 - hll2
-
-# Symmetric difference (^)
-sym_diff_count = hll1 ^ hll2
-```
