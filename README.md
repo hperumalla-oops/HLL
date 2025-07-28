@@ -42,6 +42,18 @@ for i in range(50000, 150000):
 merged = hll.merge(hll2)
 print("Union estimate:",merged)
 ```
+## Unit Test Instructions
+
+### Running All Tests
+To run all unit tests in the tests folder, open a terminal in the project root directory and execute:
+```bash
+python -m unittest discover -s tests
+```
+### Running a Specific Test File
+To run a specific test file, use the following command from the project root:
+```bash
+python -m unittest tests.test_accuracy
+```
 
 ## Database Integration
 
