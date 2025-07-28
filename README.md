@@ -22,24 +22,25 @@ pip install -e .
 ##  Quick Start
 
 ```python
-from hyperloglog import HyperLogLog
+from hyperloglog.core import HyperLogLog
 
 hll = HyperLogLog()
 
+true=100000
 # Add elements
-for i in range(100000):
+for i in range(true):
     hll.add(f"user_{i}")
 
-# Get cardinality estimate
+print(f"True unique users:",true)
 print(f"Estimated unique users: {hll.estimate()}")
+print("accuracy:", 1-((hll.estimate()-true)/true))
 
-# Merge with another counter
-hll2 = HyperLogLog(error_rate=0.01)
+hll2 = HyperLogLog()
 for i in range(50000, 150000):
     hll2.add(f"user_{i}")
 
 merged = hll.merge(hll2)
-print(f"Union estimate: {merged.estimate()}")
+print(f"Union estimate: {merged}")
 ```
 
 ## Database Integration
