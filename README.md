@@ -48,25 +48,46 @@ print("Union estimate:",merged)
 ### PostgreSQL Example
 ```python
 import psycopg2
-from hyperloglog import HyperLogLog
+from hyperloglog.core import HyperLogLog
+from hyperloglog.serialization import serialize_hll, deserialize_hll
 
-# Create and populate HLL
-hll = HyperLogLog(b=14)  # 2^14 = 16384 buckets
+your_data=['apple', 'is', 'awesome','yaya','this','is','crazy','efee','feats','micorsoft','rejected','me','yesyes','hlolate','epsilon']
+
+hll = HyperLogLog(b=14)  ##2^14 = 16384 buckets
 for item in your_data:
     hll.add(item)
 
 # Store in PostgreSQL
-conn = psycopg2.connect("your_connection_string")
+conn = psycopg2.connect(
+        dbname="xx",  ##change
+        user="postgres",
+        password="xxxx", ###change
+        host="localhost",
+        port=5432)
+
 cur = conn.cursor()
 
-# Serialize to base64 for storage
-serialized = hll.to_base64()
-cur.execute("INSERT INTO analytics (hll_data) VALUES (%s)", (serialized,))
 
-# Load from database
-cur.execute("SELECT hll_data FROM analytics WHERE id = %s", (1,))
-loaded_hll = HyperLogLog.from_base64(cur.fetchone()[0])
-print(f"Cardinality: {loaded_hll.estimate()}")
+## Serialize to base64 for storage
+serialized = serialize_hll(hll)
+cur.execute("""
+    CREATE TABLE IF NOT EXISTS analytics (
+        id SERIAL PRIMARY KEY,
+        hll_data TEXT
+    );
+""")
+conn.commit()
+
+cur.execute("INSERT INTO analytics (hll_data) VALUES (%s)", (serialized,))
+conn.commit()
+
+cur.execute("SELECT hll_data FROM analytics ORDER BY id DESC LIMIT 1")
+fetched_serialized = cur.fetchone()[0]
+
+# Deserialize
+binary = deserialize_hll(fetched_serialized)
+
+print(f"Cardinality: {binary.estimate()}")
 ```
 ### Examples provided
 ```bash
