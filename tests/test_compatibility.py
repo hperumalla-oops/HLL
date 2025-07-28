@@ -1,3 +1,5 @@
+'''to run without moving the hyerloglog folder use command
+python -m unittest tests.test_compatibility'''
 import unittest
 from hyperloglog.core import HyperLogLog
 
