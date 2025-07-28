@@ -1,3 +1,5 @@
+'''to run without moving the hyerloglog folder use command
+python -m examples.basic_usage'''
 import psycopg2
 import base64
 import pickle
@@ -22,7 +24,7 @@ try:
     conn = psycopg2.connect(
         dbname="hll_test",
         user="postgres",
-        password="AIML", 
+        password="badattitude@2005", 
         host="localhost",
         port=5432
     )
@@ -51,7 +53,7 @@ for label, items in datasets.items():
 
     estimate_before = hll.estimate()
     print(f"\n[{label.upper()}] Estimate before storing: {estimate_before}")
-    print("Registers before:", hll.registers[:10], "...")  # Print first 10 for brevity
+    print("Registers before:", hll.impl.registers[:10], "...")  # Print first 10 for brevity
 
     try:
         b64_data = serialize_hll(hll)
