@@ -59,9 +59,14 @@ Implements the probabilistic counting algorithm.
 
 **Math:**
 - Applies raw estimate:
-  \[
-  E = \alpha_m \cdot m^2 \cdot \left(\sum_{j=1}^{m} 2^{-M[j]}\right)^{-1}
-  \]
+    Raw Estimation Formula:
+    E = αₘ × m² × ( ∑(j=1 to m) 2^(-M[j]) )^(-1)
+    
+    Where:
+    - m = 2^b is the number of registers
+    - M[j] is the value in the j-th register
+    - αₘ is a constant depending on m
+
 - Applies bias correction and linear counting in small ranges.
 
 **Edge Handling:**
