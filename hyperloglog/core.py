@@ -17,7 +17,7 @@ class HyperLogLog:
         self.registers = self.impl.registers
 
     def add(self, item):
-        if (self.impl.add(item)):
+        if (self.impl.add(str(item))):
             print("Converting to Dense")
             registers = [0] * self.m
             for idx, rho in self.registers:
@@ -52,3 +52,4 @@ class HyperLogLog:
         self.impl.registers = merged_registers
 
         return self.estimate()
+
