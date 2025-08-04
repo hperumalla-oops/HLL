@@ -23,7 +23,22 @@ Replace `file_name` with the name of the test file (without the `.py` extension)
 ## Test Files
 
 ### test_accuracy.py -- *Accuracy of Estimation*
-<img width="900" height="400" alt="image" src="https://github.com/user-attachments/assets/ebd7df8a-0213-4e68-a7f9-ab18854c8718" />
+```python
+import unittest
+from hyperloglog.core import HyperLogLog
+
+class TestAccuracy(unittest.TestCase):
+    def test_large_cardinality(self):
+        hll = HyperLogLog(b=14)
+        for i in range(50000):
+            hll.add(f"item{i}")
+        est = hll.estimate()
+        self.assertTrue(abs(est - 50000) / 50000 < 0.02)  # <2% error
+
+if __name__ == "__main__":
+    unittest.main()
+
+```
 
 **Purpose:**  
 Validates that the HyperLogLog estimator produces accurate cardinality estimates for large datasets.
@@ -39,7 +54,20 @@ Ensures HyperLogLog maintains high accuracy (<2% error) on large datasets (50K i
 ---
 
 ### test_compatibility.py -- *Type Compatibility*
-<img width="900" height="410" alt="image" src="https://github.com/user-attachments/assets/e5228127-d3c4-4718-92d2-708ebbc90309" />
+```python
+import unittest
+from hyperloglog.core import HyperLogLog
+
+class TestCompatibility(unittest.TestCase):
+    def test_string_and_bytes(self):
+        hll = HyperLogLog(b=14)
+        hll.add("foo")
+        hll.add(b"foo")  # Should not raise, but may hash differently
+        self.assertIsInstance(hll.estimate(), float)
+
+if __name__ == "__main__":
+    unittest.main()
+```
 
 **Purpose:**  
 Verifies that HyperLogLog handles both str and bytes inputs without raising errors.
@@ -55,7 +83,21 @@ Confirms compatibility for both string and byte inputs; type flexibility is supp
 ---
 
 ### test_core.py -- *Basic Functionality*
-<img width="686" height="509" alt="image" src="https://github.com/user-attachments/assets/65f55367-1ed6-4ab9-85bb-55c67111f0b1" />
+```python
+import unittest
+from hyperloglog.core import HyperLogLog
+
+class TestCore(unittest.TestCase):
+    def test_basic_add_and_estimate(self):
+        hll = HyperLogLog(b=14)
+        for i in range(1000):
+            hll.add(f"item{i}")
+        est = hll.estimate()
+        self.assertTrue(900 < est < 1100)
+
+if __name__ == "__main__":
+    unittest.main()
+```
 
 **Purpose:**  
 Tests core functionality: adding elements and estimating cardinality.
@@ -71,7 +113,23 @@ Tests basic add-and-estimate logic; ensures accurate count for smaller datasets 
 ---
 
 ### test_performance.py -- *Performance Benchmark*
-<img width="853" height="577" alt="image" src="https://github.com/user-attachments/assets/d7b696dc-ec65-43bb-a2d2-c5fbcf09d008" />
+```python
+import unittest
+import time
+from hyperloglog.core import HyperLogLog
+
+class TestPerformance(unittest.TestCase):
+    def test_speed(self):
+        hll = HyperLogLog(b=14)
+        start = time.time()
+        for i in range(10000):
+            hll.add(f"item{i}")
+        elapsed = time.time() - start
+        self.assertLess(elapsed, 2.0)  # Should be fast
+
+if __name__ == "__main__":
+    unittest.main()
+```
 
 **Purpose:**  
 Measures the speed of insertion operations in HyperLogLog.
@@ -86,7 +144,23 @@ Validates performance by ensuring insertions of 10K items stay under 2 seconds.
 ---
 
 ### test_serialization.py -- *Serialization Round-trip*
-<img width="940" height="505" alt="image" src="https://github.com/user-attachments/assets/240abd9f-9675-4874-bbfd-98a8ca2f9346" />
+```python
+import unittest
+from hyperloglog.core import HyperLogLog
+from hyperloglog.serialization import serialize_hll, deserialize_hll
+
+class TestSerialization(unittest.TestCase):
+    def test_round_trip(self):
+        hll = HyperLogLog(b=14)
+        for i in range(1000):
+            hll.add(f"item{i}")
+        b64 = serialize_hll(hll)
+        hll2 = deserialize_hll(b64)
+        self.assertAlmostEqual(hll.estimate(), hll2.estimate(), delta=1)
+
+if __name__ == "__main__":
+    unittest.main()
+```
 
 **Purpose:**  
 Ensures HyperLogLog can be serialized and deserialized without losing accuracy.
