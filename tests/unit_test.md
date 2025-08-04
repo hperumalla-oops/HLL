@@ -49,6 +49,8 @@ Validates that the HyperLogLog estimator produces accurate cardinality estimates
 
 **Documentation line:**  
 Ensures HyperLogLog maintains high accuracy (<2% error) on large datasets (50K items).
+
+**Output:**
 ```bash
 .
 ----------------------------------------------------------------------
@@ -84,7 +86,14 @@ Verifies that HyperLogLog handles both str and bytes inputs without raising erro
 
 **Documentation line:**  
 Confirms compatibility for both string and byte inputs; type flexibility is supported.
-<img width="940" height="164" alt="image" src="https://github.com/user-attachments/assets/2d89f622-52fb-421b-8fb6-8406bb251875" />
+**Output:**
+```bash
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.002s
+
+OK
+```
 
 ---
 
@@ -114,7 +123,14 @@ Tests core functionality: adding elements and estimating cardinality.
 
 **Documentation line:**  
 Tests basic add-and-estimate logic; ensures accurate count for smaller datasets (1K items).
-<img width="940" height="187" alt="image" src="https://github.com/user-attachments/assets/6910d514-ebc0-42e8-a74f-6a375bd218da" />
+**Output:**
+```bash
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.007s
+
+OK
+```
 
 ---
 
@@ -145,7 +161,14 @@ Measures the speed of insertion operations in HyperLogLog.
 
 **Documentation line:**  
 Validates performance by ensuring insertions of 10K items stay under 2 seconds.
-<img width="940" height="174" alt="image" src="https://github.com/user-attachments/assets/026bbd6c-6e63-4fba-bfab-7a44e8d2552c" />
+**Output:**
+```bash
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.050s
+
+OK
+```
 
 ---
 
@@ -177,7 +200,14 @@ Ensures HyperLogLog can be serialized and deserialized without losing accuracy.
 
 **Documentation line:**  
 Checks serialization/deserialization round-trip preserves estimation with minimal deviation.
-<img width="940" height="170" alt="image" src="https://github.com/user-attachments/assets/d52b7624-95ee-44ae-8f06-5884b49ccc8d" />
+**Output:**
+```bash
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.013s
+
+OK
+```
 
 ## Test Summary
 
@@ -187,4 +217,11 @@ All tests validate different aspects of the HyperLogLog implementation:
 - **Core Functionality**: Basic operations with 10% accuracy tolerance
 - **Performance**: Fast insertion operations under 2 seconds for 10K items
 - **Serialization**: Data persistence without accuracy loss
-<img width="940" height="182" alt="image" src="https://github.com/user-attachments/assets/9f6286ef-39a2-4834-ba40-72b9a3ec6347" />
+**Output:**
+```bash
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.332s
+
+OK
+```
