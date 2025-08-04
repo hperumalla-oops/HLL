@@ -31,7 +31,9 @@ Implements the probabilistic counting algorithm.
 ### 1. **`__init__(self, b: int = 14, mode: str = 'sparse', register: = 0)`**
 
 **Inputs:**
-- `precision` (`int`): Controls the size of the register array (number of buckets = `2^b`). Higher precision gives more accuracy but uses more memory.
+- `b` (`int`): Controls the size of the register array (number of buckets = `2^b`). Higher precision gives more accuracy but uses more memory.
+- `mode` (`str`): Starts out as sparse and moves to dense when needed or can be directly set as dense
+- 'register` (`bitstream`): Compressed registers from previous data
 
 **Logic:**
 - Initializes `m = 2^b` registers.
