@@ -1,6 +1,6 @@
 from .dense import DenseHyperLogLog
 from .sparse import hll_estimate_sparse, dedupe_and_sort, SparseHyperLogLog
-from .compression import pack_registers
+from .compression import pack_registers, compress_sparse_registers
 
 class HyperLogLog:
     def __init__(self, b=14, mode='sparse', register=0):
@@ -29,7 +29,10 @@ class HyperLogLog:
         return self.impl.estimate()
 
     def storing(self):
-        return pack_registers(self.registers, 14)
+        if self.mode == 'dense':
+            return pack_registers(self.registers, self.b)
+        else:
+            return compress_sparse_registers(self.registers, self.b )
 
     def convert_to_dense(self):
         self.mode = 'dense'
@@ -52,4 +55,5 @@ class HyperLogLog:
         self.impl.registers = merged_registers
 
         return self.estimate()
+
 
