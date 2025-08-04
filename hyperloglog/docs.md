@@ -28,13 +28,13 @@ Implements the probabilistic counting algorithm.
 
 ---
 
-### 1. **`__init__(self, precision: int = 14)`**
+### 1. **`__init__(self, b: int = 14, mode: str = 'sparse', register: = 0)`**
 
 **Inputs:**
-- `precision` (`int`): Controls the size of the register array (number of buckets = `2^precision`). Higher precision gives more accuracy but uses more memory.
+- `precision` (`int`): Controls the size of the register array (number of buckets = `2^b`). Higher precision gives more accuracy but uses more memory.
 
 **Logic:**
-- Initializes `m = 2^precision` registers.
+- Initializes `m = 2^b` registers.
 - Uses the formula from the original HyperLogLog paper for alpha constant and raw estimation.
 
 
