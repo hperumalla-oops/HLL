@@ -83,7 +83,7 @@ Implements the probabilistic counting algorithm.
 
 ---
 
-## `serialization.py`
+### `serialization.py`
 
 ### `serialize_hll(hll: HyperLogLog) -> bytes`
 - Converts HLL object into a byte stream for saving or transmission.
