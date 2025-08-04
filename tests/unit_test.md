@@ -49,7 +49,13 @@ Validates that the HyperLogLog estimator produces accurate cardinality estimates
 
 **Documentation line:**  
 Ensures HyperLogLog maintains high accuracy (<2% error) on large datasets (50K items).
-<img width="940" height="182" alt="image" src="https://github.com/user-attachments/assets/ad0da1a8-c233-4e09-8dde-c34d0b306e82" />
+```bash
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.245s
+
+OK
+```
 
 ---
 
