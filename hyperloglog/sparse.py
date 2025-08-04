@@ -4,7 +4,7 @@ import math
 from .constants import ALPHA_MM, THRESHOLD, rawEstimateData, biasData
 from .bias_correction import bias_estimate
 from .hash_utils import murmurhash64a
-from .compression import unpack_registers
+from .compression import decompress_sparse_registers
 
 
 def dedupe_and_sort(sparse_data):
@@ -52,7 +52,7 @@ class SparseHyperLogLog:
         self.m = 1 << b
         self.sparse_threshold = sparse_threshold or (self.m // 4)
         if register:
-            self.registers = unpack_registers(register, 1 << b, b)
+            self.registers = decompress_sparse_registers(register, b)
         self.registers = []
         
     def add(self, item):
