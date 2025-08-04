@@ -1,24 +1,6 @@
 
 ## Usage
-```py
-hll = HyperLogLog(b=14, mode='sparse', registers=0)  
-```
-### Parameters
-- b ( bitwidth)
-  Type: int
-  Description: Number of bits used to index the register array
-  Details:
-      - Defines the number of registers: `m = 2^b`
-      - 14 by default
-      - higher b => higher memory usage, better estimate
-      - standard error: `1.04 / sqrt(m)`  
-- mode
-  Type: str
-  Options: 'sparse' 'dense'
-  Default: 'sparse'
-  Details:
-  
-- registers ( previously stored registerd in the compressed form)
+
 
 
 ##  PostgreSQL Setup
