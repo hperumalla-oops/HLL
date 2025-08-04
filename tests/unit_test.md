@@ -20,10 +20,10 @@ python -m unittest tests.file_name
 
 Replace `file_name` with the name of the test file (without the `.py` extension) you wish to run.
 
-# Test Files Overview
+## Test Files
 
 ### test_accuracy.py -- *Accuracy of Estimation*
-<img width="940" height="425" alt="image" src="https://github.com/user-attachments/assets/ebd7df8a-0213-4e68-a7f9-ab18854c8718" />
+<img width="900" height="400" alt="image" src="https://github.com/user-attachments/assets/ebd7df8a-0213-4e68-a7f9-ab18854c8718" />
 
 **Purpose:**  
 Validates that the HyperLogLog estimator produces accurate cardinality estimates for large datasets.
@@ -39,7 +39,7 @@ Ensures HyperLogLog maintains high accuracy (<2% error) on large datasets (50K i
 ---
 
 ### test_compatibility.py -- *Type Compatibility*
-<img width="940" height="412" alt="image" src="https://github.com/user-attachments/assets/e5228127-d3c4-4718-92d2-708ebbc90309" />
+<img width="900" height="410" alt="image" src="https://github.com/user-attachments/assets/e5228127-d3c4-4718-92d2-708ebbc90309" />
 
 **Purpose:**  
 Verifies that HyperLogLog handles both str and bytes inputs without raising errors.
