@@ -4,15 +4,20 @@ import math
 from .constants import ALPHA_MM, THRESHOLD
 from .bias_correction import bias_estimate
 from .hash_utils import murmurhash64a
+from .compression import unpack_registers
 
 class DenseHyperLogLog:
     """
-    Dense HyperLogLog implementation (no sparse logic).
+    Dense HyperLogLog implementation .
     """
-    def __init__(self, b=14):
+    def __init__(self, b=14, register=0):
+
         self.b = b
         self.m = 1 << b
-        self.registers = [0] * self.m
+        if register:
+            self.registers = unpack_registers(register, 1 << self.b, 14)
+        else:
+            self.registers = [0] * self.m
 
     def add(self, item):
         hash_value = murmurhash64a(item)
@@ -20,6 +25,7 @@ class DenseHyperLogLog:
         w = (hash_value << self.b) & ((1 << 64) - 1)
         rho = self._rho(w, 64 - self.b)
         self.registers[idx] = max(self.registers[idx], rho)
+        return 0
 
     def _rho(self, w, max_bits):
         def clzll(x): return 64 - x.bit_length() if x != 0 else 64
