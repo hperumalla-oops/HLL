@@ -1,5 +1,12 @@
 
-## Example Usage
+## Usage
+```py
+hll = HyperLogLog(b=14, mode='sparse', registers=0)  
+```
+### Parameters
+- b ( bitwidth)
+- mode ( 'spare' or 'dense')
+- registers ( previously stored registerd in the compressed form)
 
 
 ##  PostgreSQL Setup
