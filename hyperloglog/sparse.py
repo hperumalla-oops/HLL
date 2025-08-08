@@ -7,13 +7,6 @@ from .hash_utils import murmurhash64a
 from .compression import decompress_sparse_registers
 
 
-def dedupe_and_sort(sparse_data):
-    """
-    Remove duplicates and sort the sparse data array.
-    Returns the deduped count and sorted array.
-    """
-    unique_data = sorted(set(sparse_data))
-    return len(unique_data), unique_data
 
 def hll_estimate_sparse(hloglog_b, hloglog_binbits, sparse_data, sparse_idx):
     """
