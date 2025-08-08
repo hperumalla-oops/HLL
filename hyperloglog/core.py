@@ -7,7 +7,7 @@ class HyperLogLog:
     HyperLogLog (HLL) main interface for cardinality estimation.
     Supports both dense and sparse representations.
     """
-    def __init__(self, b=14, mode='sparse', register=0):
+    def __init__(self, b: int = 14, mode: str = 'sparse', register: int | bytes = 0):
         """
         Initializes the HyperLogLog object.
 
@@ -28,7 +28,7 @@ class HyperLogLog:
             raise ValueError('Unknown mode: ' + str(mode))
         self.registers = self.impl.registers
 
-    def add(self, item):
+    def add(self, item: object ) -> None :
         """
         Adds an item to the HLL structure.
         Args:
@@ -46,14 +46,14 @@ class HyperLogLog:
             self.registers = registers
             self.convert_to_dense()
 
-    def estimate(self):
+    def estimate(self) -> float:
         """
         Returns:
             float: estimated cardinality based on the current HLL state.
         """
         return self.impl.estimate()
 
-    def storing(self):
+    def storing(self) -> bytes:
         """
         Serializes the HLL registers for storage or transmission.
 
@@ -65,7 +65,7 @@ class HyperLogLog:
         else:
             return compress_sparse_registers(self.registers, self.b )
 
-    def convert_to_dense(self):
+    def convert_to_dense(self) -> None:
         """
         Converts the current HLL from sparse mode to dense mode.
         Updates the internal representation and registers.
@@ -176,3 +176,4 @@ class HyperLogLog:
     
     
     
+
