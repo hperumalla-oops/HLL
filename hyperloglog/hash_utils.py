@@ -1,4 +1,4 @@
-def murmurhash64a(key, seed=0):
+def murmurhash64a(key: str | bytes, seed: int = 0) -> int:
     """MurmurHash64A ported from C (Postgres)."""
     if isinstance(key, str):
         data = bytearray(key.encode('utf8'))
@@ -29,3 +29,4 @@ def murmurhash64a(key, seed=0):
     h = (h * m) & 0xFFFFFFFFFFFFFFFF
     h ^= (h >> r)
     return h
+
