@@ -8,7 +8,7 @@ from .compression import decompress_sparse_registers
 
 
 
-def hll_estimate_sparsedef hll_estimate_sparse(hloglog_b: int, hloglog_binbits: int, sparse_data: List[int], sparse_idx: int) -> float:
+def hll_estimate_sparse(hloglog_b: int, hloglog_binbits: int, sparse_data: list[int], sparse_idx: int) -> float:
     """
     Evaluates the stored encoded hashes using linear counting.
     Args:
