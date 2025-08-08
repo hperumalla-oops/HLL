@@ -30,12 +30,28 @@ class DenseHyperLogLog:
     def _rho(self, w, max_bits):
         def clzll(x): return 64 - x.bit_length() if x != 0 else 64
         rho = clzll(w) + 1
-        if rho == 64:
-            while rho < (1 << 6): 
-                w = murmurhash64a(str(w))
-                addn = clzll(w) + 1
-                rho += addn
-        return rho
+        
+        # if rho == 64:
+        #     while rho < (1 << 6): 
+        #         w = murmurhash64a(str(w))
+        #         addn = clzll(w) + 1
+        #         rho += addn
+        # return rho
+
+        if rho >= 64:
+        max_val = min(1 << 6, max_bits)  # cap with max_bits
+        safety_counter = 0               
+        while rho < max_val:
+            w = murmurhash64a(str(w))
+            addn = clzll(w) + 1
+            if addn <= 0:
+                break  # avoid infinite loop
+            rho += addn
+            safety_counter += 1
+            if safety_counter > max_bits:  # hard safety cutoff
+                break
+
+        return min(rho, max_bits)
 
     def estimate(self):
         m = self.m
