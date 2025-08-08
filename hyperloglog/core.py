@@ -65,12 +65,19 @@ class HyperLogLog:
         else:
             return compress_sparse_registers(self.registers, self.b )
 
-    def convert_to_dense(self) -> None:
+    def convert_to_dense(self):
         """
         Converts the current HLL from sparse mode to dense mode.
         Updates the internal representation and registers.
         """
-        
+
+        if self.mode == 'sparse':
+            # Convert sparse representation (list of (idx, rho)) to dense list of ints
+            registers = [0] * self.m
+            for idx, rho in self.registers:
+                registers[idx] = rho
+            self.registers = registers  # now dense list
+
         self.mode = 'dense'
         self.impl = DenseHyperLogLog(self.b, self.storing())
         self.registers = self.impl.registers
@@ -146,5 +153,6 @@ class HyperLogLog:
     
     
     
+
 
 
