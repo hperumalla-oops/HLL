@@ -1,4 +1,4 @@
-def pack_registers(registers, binbits):
+def pack_registers(registers: List[int], binbits: int) -> bytes:
     """
     Packs a list of integer registers into a bytes object using the specified number of bits per register.
     Args:
@@ -14,7 +14,7 @@ def pack_registers(registers, binbits):
     needed_bytes = (m * binbits + 7) // 8
     return bitstream.to_bytes(needed_bytes, byteorder='little')
 
-def unpack_registers(data, m, binbits):
+def unpack_registers(data: bytes, m: int, binbits: int) -> List[int]:
     """
     Unpacks a bytes object into a list of integer registers using the specified number of bits per register.
     Args:
@@ -31,7 +31,7 @@ def unpack_registers(data, m, binbits):
         val = (bitstream >> shift) & ((1 << binbits) - 1)
         regs.append(val)
     return regs
-def compress_sparse_registers(sparse_registers, b, rbits=6):
+def compress_sparse_registers(sparse_registers:  List[Tuple[int, int]], b: int, rbits: int = 6):
     """
     Compresses sparse HLL registers (list of (idx, rho)) into a bytes object.
     Args:
