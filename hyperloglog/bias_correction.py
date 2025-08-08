@@ -1,7 +1,7 @@
 from bisect import bisect_left
 from .constants import rawEstimateData, biasData
 
-def bias_estimate(E, b):
+def bias_estimate(E: float, b: int) -> float:
     """
     Interpolates the bias correction for a given estimate value.
     Args:
@@ -21,4 +21,5 @@ def bias_estimate(E, b):
         x0, x1 = raw[idx-1], raw[idx]
         y0, y1 = bias[idx-1], bias[idx]
         return y0 + (E - x0) * (y1 - y0) / (x1 - x0)
+
 
