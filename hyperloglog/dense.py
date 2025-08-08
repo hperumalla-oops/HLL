@@ -31,7 +31,7 @@ class DenseHyperLogLog:
         def clzll(x): return 64 - x.bit_length() if x != 0 else 64
         rho = clzll(w) + 1
         if rho == 64:
-            while rho < (1 << 6):  # adjust (1 << binbits) for your binbits
+            while rho < (1 << 6): 
                 w = murmurhash64a(str(w))
                 addn = clzll(w) + 1
                 rho += addn
