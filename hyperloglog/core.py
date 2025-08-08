@@ -7,7 +7,6 @@ class HyperLogLog:
         self.b = b # number of bits in the register
         self.mode = mode # dense or sparse 
         self.m = 1 << b
-        self.dontbefore = False
         if mode == 'dense':
             self.impl = DenseHyperLogLog(b, register)
         elif mode == 'sparse':
@@ -55,6 +54,7 @@ class HyperLogLog:
         self.impl.registers = merged_registers
 
         return self.estimate()
+
 
 
 
