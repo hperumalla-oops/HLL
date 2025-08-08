@@ -75,36 +75,6 @@ class HyperLogLog:
         self.impl = DenseHyperLogLog(self.b, self.storing())
         self.registers = self.impl.registers
 
-    # def merge(self, hll2):
-    #     """
-    #     Merges another HLL object into this one.
-
-    #     Args:
-    #         hll2: HyperLogLog - another HLL with the same precision parameter b
-
-    #     Returns:
-    #         float: new estimated cardinality after merging
-
-    #     Raises:
-    #         ValueError: if the precision parameter (b) values do not match
-    #     """
-        
-    #     if self.b != hll2.b:
-    #         raise ValueError("Cannot merge HLLs with different precision (b) values")
-    #     if self.mode == 'sparse':
-    #         print("Converting to Dense")
-    #         self._convert_to_dense()
-
-    #     if hll2.mode == 'sparse':
-    #         hll2._convert_to_dense()
-                              
-    #     m = 1 << self.b
-    #     merged_registers = [ max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m) ]
-
-    #     self.impl.registers = merged_registers
-
-    #     return self.estimate()
-
     def merge(self, hll2):
         """
         Merges another HLL object into this one, matching C implementation logic.
@@ -176,4 +146,5 @@ class HyperLogLog:
     
     
     
+
 
