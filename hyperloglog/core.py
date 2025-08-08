@@ -40,10 +40,6 @@ class HyperLogLog:
         
         if (self.impl.add(str(item))):
             print("Converting to Dense")
-            registers = [0] * self.m
-            for idx, rho in self.registers:
-                registers[idx] = rho
-            self.registers = registers
             self.convert_to_dense()
 
     def estimate(self) -> float:
@@ -153,6 +149,7 @@ class HyperLogLog:
     
     
     
+
 
 
 
