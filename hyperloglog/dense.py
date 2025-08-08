@@ -10,8 +10,18 @@ class DenseHyperLogLog:
     """
     Dense HyperLogLog implementation .
     """
-    def __init__(self, b=14, register=0):
+    def __init__(self, b: int = 14, register: int | bytes = 0):
+        """
+        Initializes the DenseHyperLogLog instance.
 
+        Args:
+            b (int): Precision parameter (number of bits for indexing registers). Default is 14.
+            register (int or bytes): Packed register state or 0 for a fresh instance.
+
+        Notes:
+            - The number of registers m is 2^b.
+            - If `register` is provided, it is unpacked into register values.
+        """
         self.b = b
         self.m = 1 << b
         if register:
@@ -19,7 +29,17 @@ class DenseHyperLogLog:
         else:
             self.registers = [0] * self.m
 
-    def add(self, item):
+    def add(self, item: str) -> int:
+        """
+        Adds a single item to the HLL estimator.
+
+        Args:
+            item (str): The item to add (already stringified externally).
+
+        Returns:
+            int: Always returns 0 (placeholder for compatibility with sparse mode).
+        """
+        
         hash_value = murmurhash64a(item)
         idx = hash_value >> (64 - self.b)
         w = (hash_value << self.b) & ((1 << 64) - 1)
@@ -27,17 +47,23 @@ class DenseHyperLogLog:
         self.registers[idx] = max(self.registers[idx], rho)
         return 0
 
-    def _rho(self, w, max_bits):
+    def _rho(self, w: int, max_bits: int) -> int:
+        """
+        Computes the position of the first set bit (rho value) in the hash, adjusted for noise.
+
+        Args:
+            w (int): The hashed value.
+            max_bits (int): The maximum number of bits allowed.
+
+        Returns:
+            int: The rho value, capped at `max_bits`.
+
+        Notes:
+            - Implements a fallback re-hashing loop if rho is suspiciously large.
+        """
         def clzll(x): return 64 - x.bit_length() if x != 0 else 64
         rho = clzll(w) + 1
         
-        # if rho == 64:
-        #     while rho < (1 << 6): 
-        #         w = murmurhash64a(str(w))
-        #         addn = clzll(w) + 1
-        #         rho += addn
-        # return rho
-
         if rho >= 64:
             max_val = min(1 << 6, max_bits)  # cap with max_bits
             safety_counter = 0               
@@ -53,7 +79,18 @@ class DenseHyperLogLog:
 
         return min(rho, max_bits)
 
-    def estimate(self):
+    def estimate(self) -> float:
+        """
+        Estimates the cardinality of the current multiset based on register values.
+
+        Returns:
+            float: The estimated number of unique elements.
+
+        Notes:
+            - Applies raw HyperLogLog formula for large cardinalities.
+            - Uses bias correction for mid-range estimates.
+            - Uses linear counting for small cardinalities with many zero registers.
+        """
         m = self.m
         Z = sum(2.0 ** -r for r in self.registers)
         E = ALPHA_MM[self.b] / Z
