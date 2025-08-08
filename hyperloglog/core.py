@@ -75,37 +75,104 @@ class HyperLogLog:
         self.impl = DenseHyperLogLog(self.b, self.storing())
         self.registers = self.impl.registers
 
+    # def merge(self, hll2):
+    #     """
+    #     Merges another HLL object into this one.
+
+    #     Args:
+    #         hll2: HyperLogLog - another HLL with the same precision parameter b
+
+    #     Returns:
+    #         float: new estimated cardinality after merging
+
+    #     Raises:
+    #         ValueError: if the precision parameter (b) values do not match
+    #     """
+        
+    #     if self.b != hll2.b:
+    #         raise ValueError("Cannot merge HLLs with different precision (b) values")
+    #     if self.mode == 'sparse':
+    #         print("Converting to Dense")
+    #         self._convert_to_dense()
+
+    #     if hll2.mode == 'sparse':
+    #         hll2._convert_to_dense()
+                              
+    #     m = 1 << self.b
+    #     merged_registers = [ max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m) ]
+
+    #     self.impl.registers = merged_registers
+
+    #     return self.estimate()
+
     def merge(self, hll2):
         """
-        Merges another HLL object into this one.
-
+        Merges another HLL object into this one, matching C implementation logic.
+    
         Args:
             hll2: HyperLogLog - another HLL with the same precision parameter b
-
+    
         Returns:
             float: new estimated cardinality after merging
-
+    
         Raises:
             ValueError: if the precision parameter (b) values do not match
         """
-        
         if self.b != hll2.b:
             raise ValueError("Cannot merge HLLs with different precision (b) values")
-        if self.mode == 'sparse':
-            print("Converting to Dense")
-            self._convert_to_dense()
-
-        if hll2.mode == 'sparse':
-            hll2._convert_to_dense()
-                              
-        m = 1 << self.b
-        merged_registers = [ max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m) ]
-
-        self.impl.registers = merged_registers
-
-        return self.estimate()
-
-
-
-
-
+    
+        m = 1 << self.b  # number of registers
+    
+        # === Case 1: Dense + Dense ===
+        if self.mode == 'dense' and hll2.mode == 'dense':
+            merged_registers = [
+                max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m)
+            ]
+            self.impl.registers = merged_registers
+            return self.estimate()
+    
+        # === Case 2: Dense + Sparse ===
+        if self.mode == 'dense' and hll2.mode == 'sparse':
+            for idx, rho in hll2.registers:
+                if rho > self.impl.registers[idx]:
+                    self.impl.registers[idx] = rho
+            return self.estimate()
+    
+        # === Case 3: Sparse + Dense ===
+        if self.mode == 'sparse' and hll2.mode == 'dense':
+            self.convert_to_dense()
+            for i in range(m):
+                self.impl.registers[i] = max(
+                    self.impl.registers[i], hll2.impl.registers[i]
+                )
+            return self.estimate()
+    
+        # === Case 4: Sparse + Sparse ===
+        if self.mode == 'sparse' and hll2.mode == 'sparse':
+            self_sparse = list(self.registers)
+            other_sparse = list(hll2.registers)
+    
+            # Append other's sparse data
+            self_sparse.extend(other_sparse)
+    
+            # Deduplicate sparse entries by index, keeping max rho
+            deduped = {}
+            for idx, rho in self_sparse:
+                if idx not in deduped or rho > deduped[idx]:
+                    deduped[idx] = rho
+    
+            # Convert dict back to sorted list of tuples
+            self.registers = sorted(deduped.items())
+    
+            # If sparse array is too full, promote to dense
+            if len(self.registers) > (m * (7.0 / 8)):
+                self.convert_to_dense()
+                return self.merge(hll2)  # merge again in dense mode
+    
+            return self.estimate()
+    
+    
+    
+    
+    
+    
