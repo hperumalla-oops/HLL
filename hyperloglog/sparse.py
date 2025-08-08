@@ -8,7 +8,7 @@ from .compression import decompress_sparse_registers
 
 
 
-def hll_estimate_sparse(hloglog_b, hloglog_binbits, sparse_data, sparse_idx):
+def hll_estimate_sparsedef hll_estimate_sparse(hloglog_b: int, hloglog_binbits: int, sparse_data: List[int], sparse_idx: int) -> float:
     """
     Evaluates the stored encoded hashes using linear counting.
     Args:
@@ -40,7 +40,15 @@ def hll_estimate_sparse(hloglog_b, hloglog_binbits, sparse_data, sparse_idx):
 
 
 class SparseHyperLogLog:
-    def __init__(self, b=14, register=0, sparse_threshold=None):
+    def __init__(self, b: int = 14, register: int | bytes = 0, sparse_threshold: int | None = None):
+        """
+        Initialize a sparse HLL.
+
+        Args:
+            b (int): Precision parameter (number of bits for index). Default is 14.
+            register (int | bytes): Encoded register data or 0 for empty. Default is 0.
+            sparse_threshold (int | None): Threshold for switching to dense. Defaults to m // 4.
+        """
         self.b = b
         self.m = 1 << b
         self.sparse_threshold = sparse_threshold or (self.m // 4)
@@ -48,7 +56,16 @@ class SparseHyperLogLog:
             self.registers = decompress_sparse_registers(register, b)
         self.registers = []
         
-    def add(self, item):
+    def add(self, item: object) -> int:
+        """
+        Adds an item to the HLL. Converts to dense if threshold exceeded.
+
+        Args:
+            item (object): Any hashable value; internally converted to string.
+
+        Returns:
+            int: 1 if sparse threshold exceeded (suggesting dense conversion), 0 otherwise.
+        """
            
         hash_value = murmurhash64a(item)
         idx = hash_value >> (64 - self.b)
@@ -68,7 +85,17 @@ class SparseHyperLogLog:
             return 1
         return 0
     
-    def _rho(self, w, max_bits):
+    def _rho(self, w: int, max_bits: int) -> int:
+        """
+        Computes the position of the first 1-bit (rho) in the hash suffix.
+
+        Args:
+            w (int): The suffix of the hash.
+            max_bits (int): Maximum number of bits to examine.
+
+        Returns:
+            int: rho value (1-based index of first 1-bit).
+        """
         def clzll(x): return 64 - x.bit_length() if x != 0 else 64
         rho = clzll(w) + 1
         if rho == 64:
@@ -79,8 +106,13 @@ class SparseHyperLogLog:
         return rho
     
     
-    def estimate(self):
-        """Estimate cardinality using sparse representation"""
+    def estimate(self) -> float:
+        """
+        Estimate cardinality using the sparse representation.
+
+        Returns:
+            float: Estimated number of distinct elements.
+        """
         m = self.m
         
         Z = m - len(self.registers)  # contribution from zero registers
