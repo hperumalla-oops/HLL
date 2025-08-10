@@ -25,7 +25,7 @@ class DenseHyperLogLog:
         self.b = b
         self.m = 1 << b
         if register:
-            self.registers = unpack_registers(register, 1 << self.b, 14)
+            self.registers = unpack_registers(register, 1 << self.b, self.b)
         else:
             self.registers = [0] * self.m
 
