@@ -1,4 +1,8 @@
-def murmurhash64a(key: str | bytes, seed: int = 0) -> int:
+
+
+from typing import Union
+
+def murmurhash64a(key: Union[str, bytes], seed: int = 0) -> int:
     """MurmurHash64A ported from C (Postgres)."""
     if isinstance(key, str):
         data = bytearray(key.encode('utf8'))
@@ -6,6 +10,7 @@ def murmurhash64a(key: str | bytes, seed: int = 0) -> int:
         data = bytearray(key)
     else:
         raise TypeError("key must be str or bytes")
+        
     m = 0xc6a4a7935bd1e995
     r = 47
     length = len(data)
@@ -29,4 +34,3 @@ def murmurhash64a(key: str | bytes, seed: int = 0) -> int:
     h = (h * m) & 0xFFFFFFFFFFFFFFFF
     h ^= (h >> r)
     return h
-
