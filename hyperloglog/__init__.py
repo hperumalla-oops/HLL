@@ -1,5 +1,5 @@
 """
 HyperLogLog package init.
 """
-from .dense import DenseHyperLogLog
+from .core import HyperLogLog
 
