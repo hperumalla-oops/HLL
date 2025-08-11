@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import random
 import string
-from hyperloglog.core import HyperLogLog
+from hyperloglog import HyperLogLog
 import tracemalloc
 
 
