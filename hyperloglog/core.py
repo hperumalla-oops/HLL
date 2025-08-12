@@ -16,8 +16,11 @@ class HyperLogLog:
             mode: str - 'dense' or 'sparse' mode
             register: int/bytes - initial register data (0 for empty)
         """
-        
-        self.b = b # number of bits in the register
+        if b in range(4,19):
+            self.b = b # number of bits in the register
+        else:
+             raise ValueError("Value of b not in range [4,18]")
+            
         self.mode = mode # dense or sparse 
         self.m = 1 << b
         if mode == 'dense':
@@ -149,6 +152,7 @@ class HyperLogLog:
     
     
     
+
 
 
 
