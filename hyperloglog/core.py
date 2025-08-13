@@ -81,7 +81,7 @@ class HyperLogLog:
         self.impl = DenseHyperLogLog(self.b, self.storing())
         self.registers = self.impl.registers
 
-    def merge(self, hll2):
+    def merge(self, hll2: "HyperLogLog") -> "HyperLogLog":
         """
         Merges another HLL object into this one, matching C implementation logic.
     
@@ -105,14 +105,14 @@ class HyperLogLog:
                 max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m)
             ]
             self.impl.registers = merged_registers
-            return self.estimate()
+            return self
     
         # === Case 2: Dense + Sparse ===
         if self.mode == 'dense' and hll2.mode == 'sparse':
             for idx, rho in hll2.registers:
                 if rho > self.impl.registers[idx]:
                     self.impl.registers[idx] = rho
-            return self.estimate()
+            return self
     
         # === Case 3: Sparse + Dense ===
         if self.mode == 'sparse' and hll2.mode == 'dense':
@@ -121,7 +121,7 @@ class HyperLogLog:
                 self.impl.registers[i] = max(
                     self.impl.registers[i], hll2.impl.registers[i]
                 )
-            return self.estimate()
+            return self
     
         # === Case 4: Sparse + Sparse ===
         if self.mode == 'sparse' and hll2.mode == 'sparse':
@@ -145,13 +145,14 @@ class HyperLogLog:
                 self.convert_to_dense()
                 return self.merge(hll2)  # merge again in dense mode
     
-            return self.estimate()
+            return self
     
     
     
     
     
     
+
 
 
 
