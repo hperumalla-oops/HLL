@@ -83,6 +83,19 @@ class HyperLogLog:
 
 
     def merge(self, hll2):
+         """
+        Merges another HLL object into this one, matching C implementation logic.
+    
+        Args:
+            hll2: HyperLogLog - another HLL with the same precision parameter b
+    
+        Returns:
+            HLL object: the currect HLL object with hll2's registers.
+    
+        Raises:
+            ValueError: if the precision parameter (b) values do not match
+        """
+        
         if self.b != hll2.b:
             raise ValueError("Cannot merge HLLs with different precision (b) values")
 
@@ -130,6 +143,7 @@ class HyperLogLog:
 
     
     
+
 
 
 
