@@ -1,6 +1,7 @@
 from .dense import DenseHyperLogLog
 from .sparse import SparseHyperLogLog
 from .compression import pack_registers, compress_sparse_registers
+import base64
 import struct
 
 class HyperLogLog:
@@ -152,22 +153,66 @@ class HyperLogLog:
                     return self.merge(hll2)
 
                 return self
+    def to_bytes(self) -> bytes:
+        """
+        Serialize this HLL into a stable, self-describing binary format.
+        Layout: b"HLL1" | b | mode(0/1) | uint32_be(len) | payload(storing()).
+        """
+        magic = b"HLL1"
+        if not (0 <= self.b < 32):
+            raise ValueError(f"precision b out of range: {self.b}")
+        mode_flag = 0 if self.mode == "dense" else 1
+        payload = self.storing()  
+        header = magic + bytes([self.b, mode_flag]) + struct.pack(">I", len(payload))
+        return header + payload
+
+    @classmethod
+    def from_bytes(cls, blob: bytes) -> "HyperLogLog":
+        """
+        Reconstruct an HLL safely from the binary format produced by to_bytes().
+        """
+        if len(blob) < 10:  # 4+1+1+4
+            raise ValueError("HLL blob too short")
+
+        magic = blob[:4]
+        if magic != b"HLL1":
+            raise ValueError("Invalid HLL magic/version")
+
+        b_val = blob[4]
+        if not (0 <= b_val < 32):
+            raise ValueError(f"Invalid precision b: {b_val}")
+
+        mode_flag = blob[5]
+        if mode_flag not in (0, 1):
+            raise ValueError("Invalid mode flag")
+        mode = "dense" if mode_flag == 0 else "sparse"
+
+        (length,) = struct.unpack(">I", blob[6:10])
+        if len(blob) != 10 + length:
+            raise ValueError("Invalid HLL payload length")
+
+        payload = blob[10:10+length]
+
+   
+        return cls(b=b_val, mode=mode, register=payload)
 
 
+    def to_base64(self) -> str:
+        """
+        Return Base64 (no newlines) of to_bytes(). Compatible with decoders that ignore whitespace.
+        """
+        return base64.b64encode(self.to_bytes()).decode("ascii")
 
+    @classmethod
+    def from_base64(cls, s: str) -> "HyperLogLog":
+        """
+        Build from Base64 string (whitespace-tolerant).
+        """
+        data = base64.b64decode(s)  # ignores spaces/newlines like C decoder
+        return cls.from_bytes(data)
         
         
 
-
-
-
-
-
-
-
-        
-        
-        
 
 
 
