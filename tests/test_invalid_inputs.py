@@ -1,21 +1,26 @@
 import unittest
 from hyperloglog.core import HyperLogLog
 
-class TestInvalidInputs(unittest.TestCase):
-    def setUp(self):
-        self.hll = HyperLogLog(b=14)
+class TestInvalidParameters(unittest.TestCase):
+    def test_invalid_b(self):
+        with self.assertRaises(ValueError):
+            HyperLogLog(b=2)
+
+    def test_invalid_mode(self):
+        with self.assertRaises(ValueError):
+            HyperLogLog(b=14, mode='nonsense')
 
     def test_merge_with_none(self):
         with self.assertRaises(TypeError):
-            self.hll.merge(None)
+            HyperLogLog.merge(None)
 
     def test_merge_with_string(self):
         with self.assertRaises(TypeError):
-            self.hll.merge("invalid")
+            HyperLogLog.merge("invalid")
 
     def test_add_none(self):
         with self.assertRaises(TypeError):
-            self.hll.add(None)
+            HyperLogLog.add(None)
 
-if __name__ == "__main__":
-    unittest.main()
+if __name__ == '__main__':
+    unittest.main(verbosity=2)
