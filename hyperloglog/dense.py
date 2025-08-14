@@ -22,7 +22,10 @@ class DenseHyperLogLog:
             - The number of registers m is 2^b.
             - If `register` is provided, it is unpacked into register values.
         """
-        self.b = b
+        if b in range(4,19):
+            self.b = b # number of bits in the register
+        else:
+             raise ValueError("Value of b not in range [4,18]")
         self.m = 1 << b
         if register:
             self.registers = unpack_registers(register, 1 << self.b, self.b)
