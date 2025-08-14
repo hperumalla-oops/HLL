@@ -101,7 +101,28 @@ def unpack_registers(data: bytes, m: int, binbits: int) -> list[int]:
     
     return regs
 
-  
+def compress_sparse_registers(sparse_registers, b, rbits=6):
+    """
+    Compresses sparse HLL registers (list of (idx, rho)) into a bytes object.
+    Args:
+        sparse_registers: List[Tuple[int, int]] - (index, rho) pairs
+        b: int - number of bits for the index
+        rbits: int - number of bits for rho (default 6)
+    Returns:
+        bytes: compressed sparse register representation
+    """
+    bitstream = 0
+    total_bits = 0
+    entrybits = b + rbits
+    
+    for idx, rho in sparse_registers:
+        entry = (idx << rbits) | (rho & ((1 << rbits) - 1))
+        bitstream |= entry << total_bits
+        total_bits += entrybits
+
+    num_bytes = (total_bits + 7) // 8
+    return bitstream.to_bytes(num_bytes, byteorder='little')
+    
 def decompress_sparse_registers(data: bytes, b: int, rbits: int=6):
     """
     Decompresses sparse HLL registers from a bytes object into a list of (idx, rho).
