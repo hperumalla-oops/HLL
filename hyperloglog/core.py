@@ -1,6 +1,7 @@
 from .dense import DenseHyperLogLog
 from .sparse import SparseHyperLogLog
 from .compression import pack_registers, compress_sparse_registers
+import struct
 
 class HyperLogLog:
     """
@@ -71,28 +72,29 @@ class HyperLogLog:
         else:
             return compress_sparse_registers(self.registers, self.b )
 
+        
     def convert_to_dense(self):
         """
-        Converts the current HLL from sparse mode to dense mode.
-        Updates the internal representation and registers.
+        Converts the current HLL from sparse to dense mode.
+        Updates internal implementation and registers.
         """
+        from hyperloglog.dense import DenseHyperLogLog
 
+        # Build dense registers from sparse data
         if self.mode == 'sparse':
-            # clear sparse registers to free memory
             if isinstance(self.impl, SparseHyperLogLog):
-                self.impl.registers.clear()
+                sparse_regs = self.impl.registers
+                dense_registers = [0] * self.m
+                for idx, rho in sparse_regs:
+                    dense_registers[idx] = rho
 
-            # Convert sparse representation (list of (idx, rho)) to dense list of ints
-            registers = [0] * self.m
-            for idx, rho in self.registers:
-                registers[idx] = rho
-            self.registers = registers  # now dense list
+                packed = pack_registers(dense_registers, self.b)
 
-        self.mode = 'dense'
-        self.impl = DenseHyperLogLog(self.b, self.storing())
-        self.registers = self.impl.registers
+                self.mode = 'dense'
+                self.impl = DenseHyperLogLog(self.b, packed)
+                self.registers = self.impl.registers
 
-        
+
     def merge(self, hll2):
             """
             Merges another HLL object into this one, matching C implementation logic.
