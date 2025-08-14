@@ -98,7 +98,7 @@ def unpack_registers(data: bytes, m: int, binbits: int) -> list[int]:
     
     return regs
 
-def compress_sparse_registers(sparse_registers, b, rbits=6):
+def compress_sparse_registers(sparse_registers: list[tuple[int, int]], b: int, rbits: int = 6) -> bytes:
     """
     Compresses sparse HLL registers (list of (idx, rho)) into a bytes object.
     Args:
@@ -120,7 +120,7 @@ def compress_sparse_registers(sparse_registers, b, rbits=6):
     num_bytes = (total_bits + 7) // 8
     return bitstream.to_bytes(num_bytes, byteorder='little')
     
-def decompress_sparse_registers(data: bytes, b: int, rbits: int=6):
+def decompress_sparse_registers(data: bytes, b: int, rbits: int = 6) -> list[tuple[int, int]]:
     """
     Decompresses sparse HLL registers from a bytes object into a list of (idx, rho).
     Args:
