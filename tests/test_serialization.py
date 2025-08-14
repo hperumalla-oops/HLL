@@ -14,4 +14,4 @@ class TestSerialization(unittest.TestCase):
         self.assertAlmostEqual(hll.estimate(), hll2.estimate(), delta=1)
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
