@@ -25,7 +25,8 @@ class SparseHyperLogLog:
         self.sparse_threshold = sparse_threshold or (self.m // 4)
         if register:
             self.registers = decompress_sparse_registers(register, b)
-        self.registers = []
+        else:
+            self.registers = []
         
     def add(self, item: object) -> int:
         """
