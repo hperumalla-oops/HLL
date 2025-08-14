@@ -1,6 +1,3 @@
-from typing import List
-
-
 def pack_registers(registers: list[int], binbits: int) -> bytes:
     """
     Packs a list of integer registers into a bytes object using the specified number of bits per register.
