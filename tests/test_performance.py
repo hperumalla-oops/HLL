@@ -14,4 +14,4 @@ class TestPerformance(unittest.TestCase):
         self.assertLess(elapsed, 2.0)  # Should be fast
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
