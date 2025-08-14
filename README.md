@@ -40,7 +40,7 @@ for i in range(50000, 150000):
     hll2.add(f"user_{i}")
 
 merged = hll.merge(hll2)
-print("Union estimate:",merged)
+print("Union estimate:",merged.estimate())
 ```
 
 ## Core Classes
