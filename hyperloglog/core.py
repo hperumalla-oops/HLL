@@ -24,12 +24,13 @@ class HyperLogLog:
             
         self.mode = mode # dense or sparse 
         self.m = 1 << b
+        mode = mode.lower()
         if mode == 'dense':
             self.impl = DenseHyperLogLog(b, register)
         elif mode == 'sparse':
             self.impl = SparseHyperLogLog(b, register)           
         else:
-            raise ValueError('Unknown mode: ' + str(mode))
+            raise ValueError('Unknown mode: ' + str(mode) + '.mode either be sparse or dense')
         self.registers = self.impl.registers
 
     def add(self, item: object ) -> None :
@@ -167,6 +168,7 @@ class HyperLogLog:
         
         
         
+
 
 
 
