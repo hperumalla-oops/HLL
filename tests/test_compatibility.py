@@ -11,4 +11,4 @@ class TestCompatibility(unittest.TestCase):
         self.assertIsInstance(hll.estimate(), float)
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
