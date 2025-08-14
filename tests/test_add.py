@@ -1,8 +1,4 @@
 
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # repo root
-
 from hyperloglog.core import HyperLogLog
 from hyperloglog.sparse import SparseHyperLogLog
 import unittest
@@ -32,3 +28,4 @@ class TestCoreAdd(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
