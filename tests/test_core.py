@@ -12,4 +12,4 @@ class TestCore(unittest.TestCase):
         self.assertTrue(900 < est < 1100)
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=2)
