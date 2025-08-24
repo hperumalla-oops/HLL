@@ -13,6 +13,8 @@ def serialize_hll(h: "HyperLogLog") -> str:
     Returns:
         A Base64-encoded string representing the serialized HLL.
     """
+    # Convert the HyperLogLog internal registers and metadata
+    # into a Base64-encoded string representation.
     return h.to_base64()
 
 
@@ -29,5 +31,7 @@ def deserialize_hll(b64_data: str) -> "HyperLogLog":
     Returns:
         The reconstructed HyperLogLog instance.
     """
+    # Recreate the HyperLogLog object from its Base64-encoded
+    # serialized representation.
     return HyperLogLog.from_base64(b64_data)
 
