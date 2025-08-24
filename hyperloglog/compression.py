@@ -39,11 +39,16 @@ def pack_registers(registers: list[int], binbits: int) -> bytes:
         raise OverflowError(f"Total bits ({total_bits}) too large, risk of memory overflow")
     
     # Pack registers using bitwise operations
-    m = len(registers)
+    m = len(registers)    # number of registers
     bitstream = 0
     for i, val in enumerate(registers):
+        # Equation:
+        # bitstream |= (val & ((1 << binbits) - 1)) << (i * binbits)
+        # Meaning: take only the lowest 'binbits' bits of val
+        # and place them into position (i * binbits) in the bitstream
         bitstream |= (val & ((1 << binbits) - 1)) << (i * binbits)
-    
+        
+    # Number of bytes = ceil(total bits / 8)
     needed_bytes = (m * binbits + 7) // 8
     return bitstream.to_bytes(needed_bytes, byteorder='little')
 
@@ -89,10 +94,13 @@ def unpack_registers(data: bytes, m: int, binbits: int) -> list[int]:
     # Unpack registers
     bitstream = int.from_bytes(data, byteorder='little')
     regs = []
-    mask = (1 << binbits) - 1
+    mask = (1 << binbits) - 1    # mask to extract only 'binbits' bits
     
     for i in range(m):
         shift = i * binbits
+        # Equation:
+        # val = (bitstream >> shift) & mask
+        # Meaning: shift down to align, then mask to keep only binbits bits
         val = (bitstream >> shift) & mask
         regs.append(val)
     
@@ -110,13 +118,17 @@ def compress_sparse_registers(sparse_registers: list[tuple[int, int]], b: int, r
     """
     bitstream = 0
     total_bits = 0
-    entrybits = b + rbits
+    entrybits = b + rbits    # total bits per entry
     
     for idx, rho in sparse_registers:
+        # Equation:
+        # entry = (idx << rbits) | (rho & ((1 << rbits) - 1))
+        # Meaning: store idx in higher bits, rho in lower rbits
         entry = (idx << rbits) | (rho & ((1 << rbits) - 1))
         bitstream |= entry << total_bits
         total_bits += entrybits
 
+    # Number of bytes = ceil(total_bits / 8)
     num_bytes = (total_bits + 7) // 8
     return bitstream.to_bytes(num_bytes, byteorder='little')
     
@@ -138,6 +150,7 @@ def decompress_sparse_registers(data: bytes, b: int, rbits: int = 6) -> list[tup
     sparse_registers = []
     for i in range(num_entries):
         shift = i * entrybits
+        # Extract entry: (idx in high bits, rho in low rbits)
         entry = (bitstream >> shift) & ((1 << entrybits) - 1)
         idx = entry >> rbits
         rho = entry & ((1 << rbits) - 1)
