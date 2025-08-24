@@ -24,7 +24,8 @@ class HyperLogLog:
              raise ValueError("Value of b not in range [4,18]")
             
         self.mode = mode # dense or sparse 
-        self.m = 1 << b
+        self.m = 1 << b # number of registers = 2^b
+        # Normalize mode string
         mode = mode.lower()
         if mode == 'dense':
             self.impl = DenseHyperLogLog(b, register)
@@ -32,6 +33,7 @@ class HyperLogLog:
             self.impl = SparseHyperLogLog(b, register)           
         else:
             raise ValueError('Unknown mode: ' + str(mode) + '.mode either be sparse or dense')
+        # Keep reference to underlying registers
         self.registers = self.impl.registers
 
     def add(self, item: object ) -> None :
@@ -70,8 +72,10 @@ class HyperLogLog:
             bytes: packed register data
         """
         if self.mode == 'dense':
+            # Dense registers packed compactly
             return pack_registers(self.registers, self.b)
         else:
+            # Sparse registers compressed as (index, rho) pairs
             return compress_sparse_registers(self.registers, self.b )
 
         
@@ -84,12 +88,16 @@ class HyperLogLog:
         if self.mode == 'sparse':
             if isinstance(self.impl, SparseHyperLogLog):
                 sparse_regs = self.impl.registers
+                # Initialize all registers as 0
                 dense_registers = [0] * self.m
+                # Fill in nonzero values from sparse representation
                 for idx, rho in sparse_regs:
                     dense_registers[idx] = rho
 
+                # Pack dense registers into bytes
                 packed = pack_registers(dense_registers, self.b)
 
+                # Switch mode + replace implementation
                 self.mode = 'dense'
                 self.impl = DenseHyperLogLog(self.b, packed)
                 self.registers = self.impl.registers
@@ -114,18 +122,21 @@ class HyperLogLog:
 
             m = 1 << self.b
 
+            # Case 1: both dense → elementwise max
             if self.mode == 'dense' and hll2.mode == 'dense':
                 self.impl.registers = [
                     max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m)
                 ]
                 return self
 
+            # Case 2: self dense, other sparse → update only affected indices
             if self.mode == 'dense' and hll2.mode == 'sparse':
                 for idx, rho in hll2.registers:
                     if rho > self.impl.registers[idx]:
                         self.impl.registers[idx] = rho
                 return self
 
+            # Case 3: self sparse, other dense → promote self, then merge
             if self.mode == 'sparse' and hll2.mode == 'dense':
                 self.convert_to_dense()
                 for i in range(m):
@@ -134,6 +145,7 @@ class HyperLogLog:
                     )
                 return self
 
+            # Case 4: both sparse → deduplicate with max per index
             if self.mode == 'sparse' and hll2.mode == 'sparse':
                 self_sparse = list(self.registers)
                 other_sparse = list(hll2.registers)
@@ -144,8 +156,10 @@ class HyperLogLog:
                     if idx not in deduped or rho > deduped[idx]:
                         deduped[idx] = rho
 
+                # Keep sorted sparse list
                 self.registers = sorted(deduped.items())
 
+                # If too full, auto-convert to dense and retry merge
                 if len(self.registers) > (m * (7.0 / 8)):
                     self.convert_to_dense()
                     return self.merge(hll2)
@@ -159,6 +173,7 @@ class HyperLogLog:
         magic = b"HLL1"
         if not (0 <= self.b < 32):
             raise ValueError(f"precision b out of range: {self.b}")
+        # Encode mode as flag for compactness
         mode_flag = 0 if self.mode == "dense" else 1
         payload = self.storing()  
         header = magic + bytes([self.b, mode_flag]) + struct.pack(">I", len(payload))
@@ -169,9 +184,10 @@ class HyperLogLog:
         """
         Reconstruct an HLL safely from the binary format produced by to_bytes().
         """
-        if len(blob) < 10:  # 4+1+1+4
+        if len(blob) < 10:  # 4(magic)+1(b)+1(mode)+4(length)
             raise ValueError("HLL blob too short")
 
+        # Validate magic/version
         magic = blob[:4]
         if magic != b"HLL1":
             raise ValueError("Invalid HLL magic/version")
@@ -185,6 +201,7 @@ class HyperLogLog:
             raise ValueError("Invalid mode flag")
         mode = "dense" if mode_flag == 0 else "sparse"
 
+        # Validate payload length
         (length,) = struct.unpack(">I", blob[6:10])
         if len(blob) != 10 + length:
             raise ValueError("Invalid HLL payload length")
@@ -210,6 +227,7 @@ class HyperLogLog:
         return cls.from_bytes(data)
         
         
+
 
 
 
