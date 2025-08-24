@@ -26,10 +26,12 @@ class DenseHyperLogLog:
             self.b = b # number of bits in the register
         else:
              raise ValueError("Value of b not in range [4,18]")
-        self.m = 1 << b
+        self.m = 1 << b # number of registers
         if register:
+            # Unpack provided serialized register state
             self.registers = unpack_registers(register, 1 << self.b, self.b)
         else:
+            # Fresh empty registers
             self.registers = [0] * self.m
 
     def add(self, item: str) -> int:
@@ -42,11 +44,14 @@ class DenseHyperLogLog:
         Returns:
             int: Always returns 0 (placeholder for compatibility with sparse mode).
         """
-        
+        # Hash input with 64-bit murmurhash
         hash_value = murmurhash64a(item)
+        # Split hash into register index (first b bits) and remainder (w)
         idx = hash_value >> (64 - self.b)
         w = (hash_value << self.b) & ((1 << 64) - 1)
+        # Compute rho = position of first set bit + 1
         rho = self._rho(w, 64 - self.b)
+        # Update register with max observed rho for this index
         self.registers[idx] = max(self.registers[idx], rho)
         return 0
 
@@ -64,10 +69,12 @@ class DenseHyperLogLog:
         Notes:
             - Implements a fallback re-hashing loop if rho is suspiciously large.
         """
+        # Count leading zeros (clz)
         def clzll(x): return 64 - x.bit_length() if x != 0 else 64
         rho = clzll(w) + 1
         
         if rho >= 64:
+            # Safety: if rho maxes out, keep rehashing to avoid extreme skew
             max_val = min(1 << 6, max_bits)  # cap with max_bits
             safety_counter = 0               
             while rho < max_val:
@@ -95,16 +102,21 @@ class DenseHyperLogLog:
             - Uses linear counting for small cardinalities with many zero registers.
         """
         m = self.m
+        # Raw harmonic mean estimate (HLL formula)
         Z = sum(2.0 ** -r for r in self.registers)
         E = ALPHA_MM[self.b] / Z
+        # Count empty registers (needed for small-cardinality correction)
         V = self.registers.count(0)
+        # Bias correction for small/mid range
         if E <= THRESHOLD[self.b]:
             correction = bias_estimate(E, self.b)
             E -= correction
             if E < 0:
                 E = 0
+        # Linear counting for small cardinalities (many empty registers)
         if V > 0:
             H = m * math.log(m / V)
             if H <= THRESHOLD[self.b]:
                 return H
+        # Otherwise, return corrected HLL estimate
         return E
