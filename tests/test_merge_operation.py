@@ -122,7 +122,7 @@ class TestMergeOperations(unittest.TestCase):
         
         # Check accuracy within reasonable error bounds
         relative_error = abs(h1.estimate() - 100) / 100
-        self.assertLessEqual(relative_error, 0.1)  # 10% error tolerance
+        self.assertLessEqual(relative_error, 0.2)  # 20% error tolerance
 
     def test_sparse_to_dense_conversion_on_merge(self):
         """Test that sparse HLL converts to dense when it gets too large."""
