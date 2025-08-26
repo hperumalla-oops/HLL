@@ -78,53 +78,40 @@ class TestRegisterPacking(unittest.TestCase):
 
     def test_pack_registers_value_errors(self):
         """Test pack_registers ValueError conditions with specific assertions."""
+
         # Test: registers must be a list
         with self.assertRaisesRegex(ValueError, "registers must be a list"):
             pack_registers("not a list", 8)
-        
+
         with self.assertRaisesRegex(ValueError, "registers must be a list"):
             pack_registers((1, 2, 3), 8)  # tuple instead of list
-        
-        # Test: binbits must be positive integer
-        with self.assertRaisesRegex(ValueError, "binbits must be a positive integer"):
-            pack_registers([1], 0)
-        
-        with self.assertRaisesRegex(ValueError, "binbits must be a positive integer"):
-            pack_registers([1], -1)
-        
-        with self.assertRaisesRegex(ValueError, "binbits must be a positive integer"):
-            pack_registers([1], 3.14)
-        
-        # Test: binbits must be <= 64
-        with self.assertRaisesRegex(ValueError, "binbits must be <= 64 to prevent memory issues"):
-            pack_registers([1], 65)
-        
-        with self.assertRaisesRegex(ValueError, "binbits must be <= 64 to prevent memory issues"):
-            pack_registers([1], 100)
-        
+
+        # (Removed: binbits validation tests, since this is now enforced at HLL init level)
+
         # Test: Register values must be integers
         with self.assertRaisesRegex(ValueError, "Register 1 must be an integer"):
             pack_registers([1, "not an int", 3], 8)
-        
+
         with self.assertRaisesRegex(ValueError, "Register 0 must be an integer"):
             pack_registers([3.14], 8)
-        
+
         # Test: Register values must be non-negative
         with self.assertRaisesRegex(ValueError, "Register 0 must be non-negative"):
             pack_registers([-1], 8)
-        
+
         with self.assertRaisesRegex(ValueError, "Register 2 must be non-negative"):
             pack_registers([1, 2, -5], 8)
-        
+
         # Test: Register values must fit in specified bit width
         with self.assertRaisesRegex(ValueError, "Register 0 value 256 exceeds 8-bit limit \\(255\\)"):
             pack_registers([256], 8)
-        
+
         with self.assertRaisesRegex(ValueError, "Register 1 value 16 exceeds 4-bit limit \\(15\\)"):
             pack_registers([1, 16], 4)
-        
+
         with self.assertRaisesRegex(ValueError, "Register 0 value 2 exceeds 1-bit limit \\(1\\)"):
             pack_registers([2], 1)
+
 
     def test_unpack_registers_value_errors(self):
         """Test unpack_registers ValueError conditions with specific assertions."""

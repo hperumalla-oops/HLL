@@ -18,10 +18,10 @@ class HyperLogLog:
             mode: str - 'dense' or 'sparse' mode
             register: int/bytes - initial register data (0 for empty)
         """
-        if b in range(4,19):
-            self.b = b # number of bits in the register
+        if not isinstance(b, int) or not (4 <= b <= 18):
+            raise ValueError("Value of b not in range [4,18]")
         else:
-             raise ValueError("Value of b not in range [4,18]")
+            self.b=b
             
         self.mode = mode # dense or sparse 
         self.m = 1 << b # number of registers = 2^b
@@ -165,14 +165,14 @@ class HyperLogLog:
                     return self.merge(hll2)
 
                 return self
+            
     def to_bytes(self) -> bytes:
         """
         Serialize this HLL into a stable, self-describing binary format.
         Layout: b"HLL1" | b | mode(0/1) | uint32_be(len) | payload(storing()).
         """
         magic = b"HLL1"
-        if not (0 <= self.b < 32):
-            raise ValueError(f"precision b out of range: {self.b}")
+
         # Encode mode as flag for compactness
         mode_flag = 0 if self.mode == "dense" else 1
         payload = self.storing()  
