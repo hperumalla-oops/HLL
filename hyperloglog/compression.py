@@ -34,11 +34,11 @@ def pack_registers(registers: list[int], binbits: int) -> bytes:
     
     # Check for potential overflow
     total_bits = len(registers) * binbits
-    if total_bits > 2**20:  # Arbitrary safety limit (1MB of bits)
+    if total_bits > 2**20:  #safety limit of 1MB of bits
         raise OverflowError(f"Total bits ({total_bits}) too large, risk of memory overflow")
     
     # Pack registers using bitwise operations
-    m = len(registers)    # number of registers
+    m = len(registers)   
     bitstream = 0
     for i, val in enumerate(registers):
         # Equation:
