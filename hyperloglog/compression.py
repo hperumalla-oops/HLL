@@ -16,8 +16,7 @@ def pack_registers(registers: list[int], binbits: int) -> bytes:
     # Input validation
     if not isinstance(registers, list):
         raise ValueError("registers must be a list")
-    # if not isinstance(binbits, int) or binbits <= 0:
-    #     raise ValueError("binbits must be a positive integer")
+
     if binbits > 64:
         raise ValueError("binbits must be <= 64 to prevent memory issues")
     if not registers:
