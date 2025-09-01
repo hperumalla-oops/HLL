@@ -105,55 +105,55 @@ def unpack_registers(data: bytes, m: int, binbits: int) -> list[int]:
     
     return regs
 
-def compress_sparse_registers(sparse_registers: list[tuple[int, int]], b: int, rbits: int = 6) -> bytes:
+def compress_sparse_registers(sparse_registers: dict[int, int], b: int, rbits: int = 6) -> bytes:
     """
-    Compresses sparse HLL registers (list of (idx, rho)) into a bytes object.
+    Compresses sparse HLL registers (dictionary of {idx: rho}) into a bytes object.
     Args:
-        sparse_registers: List[Tuple[int, int]] - (index, rho) pairs
-        b: int - number of bits for the index
-        rbits: int - number of bits for rho (default 6)
+        sparse_registers: dict[int, int] - dictionary mapping register indices to rho values
+        b: int - number of bits used to represent register indices (precision parameter)
+        rbits: int - number of bits used to represent rho values (default: 6)
+
     Returns:
-        bytes: compressed sparse register representation
+        bytes - compressed binary representation of the sparse registers
     """
     bitstream = 0
     total_bits = 0
-    entrybits = b + rbits    # total bits per entry
-    
-    for idx, rho in sparse_registers:
-        # Equation:
-        # entry = (idx << rbits) | (rho & ((1 << rbits) - 1))
-        # Meaning: store idx in higher bits, rho in lower rbits
+    entrybits = b + rbits
+
+    # The loop must iterate over .items() to get both key and value
+    for idx, rho in sparse_registers.items():
         entry = (idx << rbits) | (rho & ((1 << rbits) - 1))
         bitstream |= entry << total_bits
         total_bits += entrybits
 
-    # Number of bytes = ceil(total_bits / 8)
     num_bytes = (total_bits + 7) // 8
     return bitstream.to_bytes(num_bytes, byteorder='little')
     
-def decompress_sparse_registers(data: bytes, b: int, rbits: int = 6) -> list[tuple[int, int]]:
+def decompress_sparse_registers(data: bytes, b: int, rbits: int = 6) -> dict[int, int]:
     """
-    Decompresses sparse HLL registers from a bytes object into a list of (idx, rho).
+    Decompresses sparse HLL registers from a bytes object into a dictionary of {idx: rho}.
     Args:
-        data: bytes - compressed sparse register data
-        b: int - number of bits for the index
-        rbits: int - number of bits for rho (default 6)
+        data: bytes - compressed binary data created by compress_sparse_registers()
+        b: int - number of bits used to represent register indices (precision parameter)
+        rbits: int - number of bits used to represent rho values (default: 6)
+
     Returns:
-        List[Tuple[int, int]]: decompressed sparse registers
+        dict[int, int] - dictionary mapping register indices to rho values
     """
     bitstream = int.from_bytes(data, byteorder='little')
     entrybits = b + rbits
     total_bits = len(data) * 8
     num_entries = total_bits // entrybits
 
-    sparse_registers = []
+    # Build a dictionary directly instead of a list
+    sparse_registers = {}
     for i in range(num_entries):
         shift = i * entrybits
-        # Extract entry: (idx in high bits, rho in low rbits)
         entry = (bitstream >> shift) & ((1 << entrybits) - 1)
         idx = entry >> rbits
         rho = entry & ((1 << rbits) - 1)
-        sparse_registers.append((idx, rho))
+        # Note: In case of duplicate idx from corrupted data, this safely keeps the last one.
+        sparse_registers[idx] = rho
     
     return sparse_registers
 
