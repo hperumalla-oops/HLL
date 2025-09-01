@@ -9,5 +9,5 @@ setup(
     install_requires=[
         'psycopg2==2.9.10', 'numpy==2.3.2', 'mmh3==5.2.0'
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.10',
 )
