@@ -1,4 +1,3 @@
-from bisect import bisect_left
 import math
 
 from .constants import ALPHA_MM, THRESHOLD
@@ -29,42 +28,32 @@ class SparseHyperLogLog:
         self.sparse_threshold = sparse_threshold or (self.m // 4)
         if register:
             # If registers are provided in compressed form, decompress them
-            self.registers = decompress_sparse_registers(register, b)
+            self.registers = dict(decompress_sparse_registers(register, b))
         else:
             # Start with an empty sparse register set
-            self.registers = []
-        
+            self.registers = {}
+    
     def add(self, item: object) -> int:
         """
-        Adds an item to the HLL. Converts to dense if threshold exceeded.
+        Adds an item to the sparse HyperLogLog sketch.
 
         Args:
-            item (object): Any hashable value; internally converted to string.
+            item: object - the item to add to the HyperLogLog sketch
 
         Returns:
-            int: 1 if sparse threshold exceeded (suggesting dense conversion), 0 otherwise.
+            int - 1 if conversion to dense mode is needed (sparse threshold exceeded), 0 otherwise
         """
-
-        # Compute hash and derive register index + rho value
         hash_value = murmurhash64a(item)
-        idx = hash_value >> (64 - self.b)    # register index
-        w = (hash_value << self.b) & ((1 << 64) - 1)    # suffix
-
+        idx = hash_value >> (64 - self.b)
+        w = (hash_value << self.b) & ((1 << 64) - 1)
         rho = self._rho(w, 64 - self.b)
 
-        # Insert/update (idx, rho) in sorted register list
-        pos = bisect_left(self.registers, (idx, 0))
-        
-        if pos < len(self.registers) and self.registers[pos][0] == idx:
-            # Update if this rho is larger than existing
-            current_rho = self.registers[pos][1]
-            if rho > current_rho:
-                self.registers[pos] = (idx, rho)
-        else:
-            # Insert new index-rho pair in sorted order
-            self.registers.insert(pos, (idx, rho))
+        # O(1) average time for lookup and update
+        current_rho = self.registers.get(idx, 0)
+        if rho > current_rho:
+            self.registers[idx] = rho
 
-        # If too many registers filled, suggest dense conversion
+        # Check against threshold
         if len(self.registers) > self.sparse_threshold:
             return 1
         return 0
@@ -111,7 +100,7 @@ class SparseHyperLogLog:
         m = self.m
         
         Z = m - len(self.registers)  # contribution from zero registers
-        Z += sum(2.0 ** -rho for _, rho in self.registers)
+        Z += sum(2.0 ** -rho for rho in self.registers.values())
 
         # Raw estimate
         E = ALPHA_MM[self.b] / Z
