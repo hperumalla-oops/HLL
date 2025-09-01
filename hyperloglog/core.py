@@ -6,233 +6,133 @@ import struct
 
 class HyperLogLog:
     """
-    HyperLogLog (HLL) main interface for cardinality estimation.
-    Supports both dense and sparse representations.
+    HyperLogLog (HLL) main interface, delegating to sparse or dense implementations.
     """
     def __init__(self, b: int = 14, mode: str = 'sparse', register: int | bytes = 0):
-        """
-        Initializes the HyperLogLog object.
-
-        Args:
-            b: int - number of bits used to index registers (precision parameter)
-            mode: str - 'dense' or 'sparse' mode
-            register: int/bytes - initial register data (0 for empty)
-        """
+        """Initializes the HyperLogLog object."""
+        if not isinstance(b, int) or not (4 <= b <= 18):
+            raise ValueError("Value of b not in range [4,18]")
+        
         if not isinstance(b, int) or not (4 <= b <= 18):
             raise ValueError("Value of b not in range [4,18]")
         else:
             self.b=b
             
-        self.mode = mode # dense or sparse 
-        self.m = 1 << b # number of registers = 2^b
-        # Normalize mode string
-        mode = mode.lower()
-        if mode == 'dense':
+        self.mode = mode.lower()
+        self.m = 1 << b
+        
+        if self.mode == 'dense':
             self.impl = DenseHyperLogLog(b, register)
-        elif mode == 'sparse':
-            self.impl = SparseHyperLogLog(b, register)           
+        elif self.mode == 'sparse':
+            self.impl = SparseHyperLogLog(b, register)
         else:
-            raise ValueError('Unknown mode: ' + str(mode) + '.mode either be sparse or dense')
-        # Keep reference to underlying registers
-        self.registers = self.impl.registers
+            raise ValueError("Mode must be 'sparse' or 'dense'")
+        # CORRECTED: The stale self.registers reference has been removed.
 
-    def add(self, item: object ) -> None :
-        """
-            Adds an item to the HyperLogLog estimator, managing sparse/dense mode automatically.
-
-            Converts the item to a string, hashes it, and updates the current
-            implementation (sparse or dense). If sparse mode exceeds its threshold,
-            the HLL is promoted to dense mode.
-
-            Args:
-                item (object): Any hashable object to add.
-
-            Notes:
-                - Mode switching is automatic; callers do not manage it.
-                - The cardinality estimate is approximate and probabilistic.
-                - This method mutates the HLL state and returns nothing.
-        """
-                
-        if (self.impl.add(str(item))):
-            print("Converting to Dense")
+    def add(self, item: object) -> None:
+        """Adds an item to the HLL, converting to dense mode if necessary."""
+        if self.impl.add(str(item)):
+            # Signal received from sparse impl to convert to dense
             self.convert_to_dense()
 
     def estimate(self) -> float:
-        """
-        Returns:
-            float: estimated cardinality based on the current HLL state.
-        """
+        """Returns the estimated cardinality."""
         return self.impl.estimate()
 
     def storing(self) -> bytes:
-        """
-        Serializes the HLL registers for storage or transmission.
-
-        Returns:
-            bytes: packed register data
-        """
+        """Serializes the HLL registers for storage."""
         if self.mode == 'dense':
-            # Dense registers packed compactly
-            return pack_registers(self.registers, self.b)
+            # CORRECTED: Use 6 bits for packing dense registers and access via self.impl
+            return pack_registers(self.impl.registers, 6)
         else:
-            # Sparse registers compressed as (index, rho) pairs
-            return compress_sparse_registers(self.registers, self.b )
+            # CORRECTED: Access registers via self.impl
+            return compress_sparse_registers(self.impl.registers, self.b)
 
-        
     def convert_to_dense(self):
-        """
-        Converts the current HLL from sparse to dense mode.
-        Updates internal implementation and registers.
-        """
-        # Build dense registers from sparse data
+        """Converts the HLL from sparse to dense mode."""
         if self.mode == 'sparse':
-            if isinstance(self.impl, SparseHyperLogLog):
-                sparse_regs = self.impl.registers
-                # Initialize all registers as 0
-                dense_registers = [0] * self.m
-                # Fill in nonzero values from sparse representation
-                for idx, rho in sparse_regs:
-                    dense_registers[idx] = rho
+            sparse_regs = self.impl.registers
+            dense_registers = [0] * self.m
+            for idx, rho in sparse_regs.items():
+                dense_registers[idx] = rho
 
-                # Pack dense registers into bytes
-                packed = pack_registers(dense_registers, self.b)
+            # CORRECTED: Use 6 bits for packing dense registers
+            packed = pack_registers(dense_registers, 6)
 
-                # Switch mode + replace implementation
-                self.mode = 'dense'
-                self.impl = DenseHyperLogLog(self.b, packed)
-                self.registers = self.impl.registers
+            self.mode = 'dense'
+            self.impl = DenseHyperLogLog(self.b, packed)
 
+    def merge(self, hll2: "HyperLogLog"):
+        """Merges another HLL object into this one."""
+        if self.b != hll2.b:
+            raise ValueError("Cannot merge HLLs with different precision")
 
-    def merge(self, hll2):
-            """
-            Merges another HLL object into this one, matching C implementation logic.
-        
-            Args:
-                hll2: HyperLogLog - another HLL with the same precision parameter b
-        
-            Returns:
-                HLL object: the currect HLL object with hll2's registers.
-        
-            Raises:
-                ValueError: if the precision parameter (b) values do not match
-            """
+        # Case 1: both dense
+        if self.mode == 'dense' and hll2.mode == 'dense':
+            for i in range(self.m):
+                self.impl.registers[i] = max(self.impl.registers[i], hll2.impl.registers[i])
+            return self
+
+        # Case 2: self dense, other sparse
+        if self.mode == 'dense' and hll2.mode == 'sparse':
+            # CORRECTED: Access registers via self.impl
+            for idx, rho in hll2.impl.registers.items():
+                if rho > self.impl.registers[idx]:
+                    self.impl.registers[idx] = rho
+            return self
+
+        # Case 3: self sparse, other dense
+        if self.mode == 'sparse' and hll2.mode == 'dense':
+            self.convert_to_dense()
+            # CORRECTED: Cleaner logic to re-run merge after conversion
+            return self.merge(hll2) 
+
+        # Case 4: both sparse
+        if self.mode == 'sparse' and hll2.mode == 'sparse':
+            # CORRECTED: Access registers via self.impl
+            for idx, rho in hll2.impl.registers.items():
+                current_rho = self.impl.registers.get(idx, 0)
+                if rho > current_rho:
+                    self.impl.registers[idx] = rho
             
-            if self.b != hll2.b:
-                raise ValueError("Cannot merge HLLs with different precision (b) values")
-
-            m = 1 << self.b
-
-            # Case 1: both dense → elementwise max
-            if self.mode == 'dense' and hll2.mode == 'dense':
-                self.impl.registers = [
-                    max(self.impl.registers[i], hll2.impl.registers[i]) for i in range(m)
-                ]
-                return self
-
-            # Case 2: self dense, other sparse → update only affected indices
-            if self.mode == 'dense' and hll2.mode == 'sparse':
-                for idx, rho in hll2.registers:
-                    if rho > self.impl.registers[idx]:
-                        self.impl.registers[idx] = rho
-                return self
-
-            # Case 3: self sparse, other dense → promote self, then merge
-            if self.mode == 'sparse' and hll2.mode == 'dense':
+            # After merge, check if it's full enough to convert
+            if len(self.impl.registers) > self.impl.sparse_threshold:
                 self.convert_to_dense()
-                for i in range(m):
-                    self.impl.registers[i] = max(
-                        self.impl.registers[i], hll2.impl.registers[i]
-                    )
-                return self
+            return self
 
-            # Case 4: both sparse → deduplicate with max per index
-            if self.mode == 'sparse' and hll2.mode == 'sparse':
-                self_sparse = list(self.registers)
-                other_sparse = list(hll2.registers)
-                self_sparse.extend(other_sparse)
-
-                deduped = {}
-                for idx, rho in self_sparse:
-                    if idx not in deduped or rho > deduped[idx]:
-                        deduped[idx] = rho
-
-                # Keep sorted sparse list
-                self.registers = sorted(deduped.items())
-
-                # If too full, auto-convert to dense and retry merge
-                if len(self.registers) > (m * (7.0 / 8)):
-                    self.convert_to_dense()
-                    return self.merge(hll2)
-
-                return self
-            
     def to_bytes(self) -> bytes:
-        """
-        Serialize this HLL into a stable, self-describing binary format.
-        Layout: b"HLL1" | b | mode(0/1) | uint32_be(len) | payload(storing()).
-        """
+        """Serializes the HLL into a stable, self-describing binary format."""
         magic = b"HLL1"
-
-        # Encode mode as flag for compactness
         mode_flag = 0 if self.mode == "dense" else 1
-        payload = self.storing()  
+        payload = self.storing()
         header = magic + bytes([self.b, mode_flag]) + struct.pack(">I", len(payload))
         return header + payload
 
     @classmethod
     def from_bytes(cls, blob: bytes) -> "HyperLogLog":
-        """
-        Reconstruct an HLL safely from the binary format produced by to_bytes().
-        """
-        if len(blob) < 10:  # 4(magic)+1(b)+1(mode)+4(length)
+        """Reconstructs an HLL from its binary format."""
+        if len(blob) < 10:
             raise ValueError("HLL blob too short")
-
-        # Validate magic/version
-        magic = blob[:4]
+            
+        magic, b_val, mode_flag = blob[:4], blob[4], blob[5]
         if magic != b"HLL1":
             raise ValueError("Invalid HLL magic/version")
-
-        b_val = blob[4]
-        if not (0 <= b_val < 32):
-            raise ValueError(f"Invalid precision b: {b_val}")
-
-        mode_flag = blob[5]
-        if mode_flag not in (0, 1):
-            raise ValueError("Invalid mode flag")
+            
         mode = "dense" if mode_flag == 0 else "sparse"
-
-        # Validate payload length
         (length,) = struct.unpack(">I", blob[6:10])
+        
         if len(blob) != 10 + length:
             raise ValueError("Invalid HLL payload length")
-
-        payload = blob[10:10+length]
-
-   
+            
+        payload = blob[10:]
         return cls(b=b_val, mode=mode, register=payload)
 
-
     def to_base64(self) -> str:
-        """
-        Return Base64 (no newlines) of to_bytes(). Compatible with decoders that ignore whitespace.
-        """
+        """Returns a Base64 representation of the serialized HLL."""
         return base64.b64encode(self.to_bytes()).decode("ascii")
 
     @classmethod
     def from_base64(cls, s: str) -> "HyperLogLog":
-        """
-        Build from Base64 string (whitespace-tolerant).
-        """
-        data = base64.b64decode(s)  # ignores spaces/newlines like C decoder
+        """Builds an HLL from a Base64 string."""
+        data = base64.b64decode(s)
         return cls.from_bytes(data)
-        
-        
-
-
-
-
-
-
-
-
-
