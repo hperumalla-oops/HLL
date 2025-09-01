@@ -25,7 +25,7 @@ class DenseHyperLogLog:
         self.m = 1 << b # number of registers
         if register:
             # Unpack provided serialized register state
-            self.registers = unpack_registers(register, 1 << self.b, self.b)
+            self.registers = unpack_registers(register, self.m, 6)
         else:
             # Fresh empty registers
             self.registers = [0] * self.m
