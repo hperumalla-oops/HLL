@@ -1,4 +1,3 @@
-from bisect import bisect_left
 import math
 
 from .constants import ALPHA_MM, THRESHOLD
