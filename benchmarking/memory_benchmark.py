@@ -28,6 +28,7 @@ for N in test_sizes:
     tracemalloc.stop()
 
     memory_usages_kb.append(peak / 1024)  # Convert to kilobytes
+    actual_values.append(N)
     print(f"Cardinality: {N}, Peak Memory Usage: {peak / 1024:.2f} KB")
 
 
