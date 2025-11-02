@@ -67,7 +67,7 @@ for label, items in datasets.items():
     # Estimate cardinality before storing
     estimate_before = hll.estimate()
     print(f"\n[{label.upper()}] Estimate before storing: {estimate_before}")
-    print("Registers before:", hll.impl.registers[:10], "...")  # show first 10 registers
+    
 
     try:
         # Serialize HLL object to base64 string
