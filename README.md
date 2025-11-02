@@ -1,6 +1,6 @@
 # HyperLogLog Implementation in Python
 
-A high-performance Python implementation of the HyperLogLog probabilistic cardinality estimator, based on the PostgreSQL HLL extension. For python >= 9.10
+A high-performance Python implementation of the HyperLogLog probabilistic cardinality estimator, based on the PostgreSQL HLL extension. For python >= 3.10
 
 ## Features
 
